@@ -1,0 +1,69 @@
+#Contains data necessary to build a graph.
+#Each node will contain a name, a country and three misc fields
+
+#Names in this file: 27
+
+#nameStart
+Musa Warren
+Charlie Bronson
+Elsie-Rose Oneill
+Kai Weber
+Jodi	Jassen
+Elsa Eriksson
+Alfred Dreyfus
+Billy Pilgrim
+Adele Ansel
+Yuri Gagarin
+Jinhua Zhang
+Joshua Graham
+Mikhail Lermontov
+George Orwell
+Ayn Rand
+Sean Diaz
+Daniel Diaz
+Trevor Phillips
+Chris Avellone
+Andrzej Sapkowski
+Craig Boone
+Wallace Breen
+Robert House
+Gordon Freeman
+Jack of Blades
+Andrew Ryan
+Genichiro Ashina
+#nameEnd
+
+#CountryStart
+The United States
+England
+Germany
+Sweden
+China
+France
+India
+Russia
+Poland
+#CountryEnd
+
+#MiscStart
+Has three cats
+Sentenced for life in prison
+Watches soap operas
+Voted for conservatives
+Makes $200,000 a year
+Owns a dog
+Created a successful startup
+Was wrongfully imprisoned
+Never sleeps
+Hates tea
+Owns a casino
+Works as a freelance writer
+Piloted a spacecraft
+Has burn scars
+Earned a Ph.D. in physics
+Loves their spouse
+Helped establish a new regime in Eastern Europe
+Knows all about Geralt of Rivia
+Wasn't appreciated during his time
+Has an older brother
+#MiscEnd
