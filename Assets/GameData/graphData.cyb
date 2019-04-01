@@ -1,7 +1,7 @@
 #Contains data necessary to build a graph.
 #Each node will contain a name, a country and three misc fields
 
-#Names in this file: 27
+#Names in this file: 29
 
 #nameStart
 Musa Warren
@@ -31,6 +31,9 @@ Gordon Freeman
 Jack of Blades
 Andrew Ryan
 Genichiro Ashina
+Gyoubu Oniwa
+JC Denton
+Venkat Kapoor
 #nameEnd
 
 #CountryStart
@@ -43,6 +46,7 @@ France
 India
 Russia
 Poland
+Japan
 #CountryEnd
 
 #MiscStart

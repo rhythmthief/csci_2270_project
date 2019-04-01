@@ -61,5 +61,7 @@
 "workbench.iconTheme": "material-icon-theme",
 "workbench.editor.highlightModifiedTabs": true,
 "cSpell.language": "en",
-"editor.codeLens": false
+"editor.codeLens": false,
+"editor.acceptSuggestionOnCommitCharacter": false,
+"razor.disabled": true
 }

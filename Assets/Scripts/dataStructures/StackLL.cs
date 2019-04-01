@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /* Basic node of a linked list */
-public class StackNode
+class StackNode
 {
 	public int key;
 	public StackNode next = null;
@@ -31,15 +31,8 @@ public class StackLL
 	{
 		StackNode newNode = new StackNode(key);
 
-		if (head == null) //Edge case when the stack is empty
-		{
-			head = newNode;
-		}
-		else
-		{
-			newNode.next = head;
-			head = newNode;
-		}
+		newNode.next = head;
+		head = newNode;
 	}
 
 	/* Removes an element from the top of the stack */

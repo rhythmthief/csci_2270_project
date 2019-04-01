@@ -30,6 +30,9 @@ using System.IO; //Contains StreamReader class
 /*
 	TODOs:
 		Double the number of names on the list
+		linked lists in a graph node
+		Revise all comments -- there have been changes to the graph structure (adjacency list to matrix)
+		Indexes are retrieved by clicking on node visualizations
 
 */
 
@@ -38,13 +41,29 @@ public class driver : MonoBehaviour //MonoBehaviour is the base class of Unity, 
 	public Helpers help; //I am calling the helper functions I need through this instance, seeing how I can't inherit from both MonoBehavior and Helpers
 
 	StackLL testStack = new StackLL();
-
+	LinkedList testList = new LinkedList(); //not tested yet
+	Graph testGraph = new Graph(15);
 
 	void Start()
 	{
 		//int test;
 		//test = help.readGameData();
 		//Application.targetFrameRate = 65; //Just a precaution in case v-sync isn't active on a machine
+		
+		
+		// for (int i = 0; i < 10; i++)
+		// {
+		// 	testStack.push(i);
+		// }
+
+		// testStack.print();
+
+		
+		/*
+			CONNECTIONS WILL BE DISTRIBUTED RANDOMLY, BUT EACH NODE HAS AT LEAST ONE
+
+			LET THE PLAYER PICK THE NUMBER OF VERTICES AS DIFFICULTIES
+		*/
 
 	}
 
