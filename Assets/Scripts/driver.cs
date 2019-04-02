@@ -29,10 +29,13 @@ using System.IO; //Contains StreamReader class
 
 /*
 	TODOs:
-		Double the number of names on the list
-		linked lists in a graph node
+		The idea behind graphs is that nodes have to exchange information. This functionality is present in the form of "tips."
+		
 		Revise all comments -- there have been changes to the graph structure (adjacency list to matrix)
+		
 		Indexes are retrieved by clicking on node visualizations
+
+		Tips are stored as a global linked list in the form of "JC Denton knows someone who makes $200,000 a year," this linked list is printed in a separate window which can be pulled up or hidden.
 
 */
 

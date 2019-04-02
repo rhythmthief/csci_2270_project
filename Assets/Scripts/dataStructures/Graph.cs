@@ -4,8 +4,10 @@ using UnityEngine;
 
 /*
 	Notes:
-		Each node contains a linked list with tips
 		Edges are unweighted and undirected
+
+	TODOs:
+		Function to retrieve tips through the graph
 */
 
 public class Vertex
@@ -15,7 +17,6 @@ public class Vertex
 	public string country;
 	public string[] misc;
 	public Vertex next;
-	public LinkedList tips;
 
 	/* Parameterized constructor */
 	public Vertex(int _index, string _name, string _country, string[] _misc)
@@ -24,7 +25,6 @@ public class Vertex
 		name = _name;
 		country = _country;
 		misc = _misc;
-		tips = new LinkedList();
 	}
 
 	//The default constructor is empty and gets used only to initialize the head of an empty linked list of vertices
@@ -119,5 +119,15 @@ public class Graph
 		}
 
 		return walker;
+	}
+
+	/* Looks up information from adjacent nodes and returns it as a string */
+	public string generateTip(int _index)
+	{
+
+
+
+
+		return null;
 	}
 }
