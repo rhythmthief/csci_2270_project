@@ -3,7 +3,7 @@
 
 #Names in this file: 29
 
-#nameStart
+#NameStart
 Musa Warren
 Charlie Bronson
 Elsie-Rose Oneill
@@ -20,8 +20,8 @@ Mikhail Lermontov
 George Orwell
 Ayn Rand
 Sean Diaz
+Cloud Strife
 Daniel Diaz
-Trevor Phillips
 Chris Avellone
 Andrzej Sapkowski
 Craig Boone
@@ -34,10 +34,10 @@ Genichiro Ashina
 Gyoubu Oniwa
 JC Denton
 Venkat Kapoor
-#nameEnd
+#stop
 
 #CountryStart
-The United States
+USA
 England
 Germany
 Sweden
@@ -47,13 +47,13 @@ India
 Russia
 Poland
 Japan
-#CountryEnd
+#stop
 
 #MiscStart
 Has three cats
-Sentenced for life in prison
+Sentenced to life in prison
 Watches soap operas
-Voted for conservatives
+Doesn't vote during the elections
 Makes $200,000 a year
 Owns a dog
 Created a successful startup
@@ -70,4 +70,4 @@ Helped establish a new regime in Eastern Europe
 Knows all about Geralt of Rivia
 Wasn't appreciated during his time
 Has an older brother
-#MiscEnd
+#stop

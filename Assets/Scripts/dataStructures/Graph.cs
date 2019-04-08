@@ -84,8 +84,6 @@ public class Graph
 		matrix[vx1, vx0] = 1; //The matrix technically has to be symmetrical relative to the main diagonal, since my edges are undirected
 	}
 
-	//Method to look up a vertex under an index?
-
 	/* Checks whether two vertices share an edge. Since my graph is undirected, I'll only check it one way */
 	public bool checkAdjacency(int vx0, int vx1)
 	{
@@ -124,7 +122,7 @@ public class Graph
 	/* Looks up information from adjacent nodes and returns it as a string */
 	public string generateTip(int _index)
 	{
-
+		
 
 
 

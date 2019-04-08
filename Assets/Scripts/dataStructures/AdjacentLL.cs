@@ -4,7 +4,7 @@ using UnityEngine;
 
 /*
 	!!!WARNING!!!
-	THIS IMPLEMENTATION IS CURRENTLY NOT USED FOR THIS PROJECT.
+	THIS IMPLEMENTATION IS CURRENTLY NOT USED IN THE FINAL PROJECT.
 	I scrapped it in favor of an adjacency matrix, but decided to keep the code for the time being.
 */
 
