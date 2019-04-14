@@ -7,6 +7,7 @@ using UnityEngine;
 		This is the main driver file used to power the entire project
 		C# doesn't use header files, everything is automatically visible to other parts of the project without #inclusion
 		I am using "class" to define LL nodes throughout my data structures, since in C# a class is reference type and can be handled like a pointer
+		Default access level within Unity is private
 
 	Gameplay:
 		The player starts with a single revealed node and sees one random piece of information for every connected node as well as for their own immediate connections, but the exact relationship to the original node is not specified. The goal is to match all names with their respective nodes. Nodes are verified as name + at least 1 connection. There are extra profiles which never show up in the graph. The player works against a timer, verification and tips cost time. The goal is to reveal the entire grid and find the "person of interest", who is described through second-order information ("knows someone who knows a person who owns a dog...")
@@ -38,12 +39,26 @@ using UnityEngine;
 
 		Revise all comments -- there have been changes to the graph structure (adjacency list to matrix)
 
+		Expose a vertex's ID within the List and use it to call vertices within the game
+
+		keep track of the indices the player is working with
+
+		track whether tipCache in the graph is full. If it is, disable the button for requesting tips
+		cache for the chosen node has to be randomized
+
+	UNIMPLEMENTED:
+		Graph --> getTip() --> Mode 1
+
+	FULLY IMPLEMENTED:
+		StackLL
+		LinkedList
+
 
 */
 
 public class driver : MonoBehaviour //MonoBehaviour is the base class of Unity, from which every other script derives
 {
-	public Helpers help; //I am calling the helper functions I need through this instance, seeing how I can't inherit from both MonoBehavior and Helpers
+	internal Helpers help; //I am calling the helper functions I need through this instance, seeing how I can't inherit from both MonoBehavior and Helpers
 
 	StackLL testStack = new StackLL();
 	LinkedList testList = new LinkedList(); //not tested yet
@@ -55,13 +70,10 @@ public class driver : MonoBehaviour //MonoBehaviour is the base class of Unity, 
 		//test = help.readGameData();
 		//Application.targetFrameRate = 65; //Just a precaution in case v-sync isn't active on a machine
 		
-		
 		for (int i = 0; i < 10; i++)
 		{
 			testList.addNode("" + i);
 		}
-
-		testList.deleteList();
 
 		// testStack.print();
 		

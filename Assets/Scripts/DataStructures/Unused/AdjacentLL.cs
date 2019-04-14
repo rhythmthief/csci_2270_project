@@ -10,28 +10,28 @@ using UnityEngine;
 
 class AdjNode
 {
-	public Vertex adj;
-	public AdjNode next = null;
+	internal Vertex adj;
+	internal AdjNode next = null;
 
-	public AdjNode(Vertex _adj)
+	internal AdjNode(Vertex _adj)
 	{
 		adj = _adj;
 	}
 }
 
-public class AdjacentLL
+internal class AdjacentLL
 {
 	AdjNode head = null;
 
 	/* Adds a new node to the beginning of the list */
-	public void addAdj(Vertex _vertex)
+	internal void addAdj(Vertex _vertex)
 	{
 		AdjNode newNode = new AdjNode(_vertex);
 		newNode.next = head;
 		head = newNode;
 	}
 
-	public bool isAdjacent(Vertex _vertex)
+	internal bool isAdjacent(Vertex _vertex)
 	{
 		bool pass = false; //Turns to true if we determine that two vertices are adjacent
 		AdjNode walker = head;
@@ -49,7 +49,7 @@ public class AdjacentLL
 		return pass;
 	}
 
-	public bool isEmpty()
+	internal bool isEmpty()
 	{
 		bool empty = false;
 

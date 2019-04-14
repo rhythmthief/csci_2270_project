@@ -8,7 +8,7 @@ using System.IO; //Contains the StreamReader class
 		This file contains definitions for helper functions used in the driver file
 */
 
-public class Helpers : MonoBehaviour
+internal class Helpers
 {
 	/* A helper function which reads a section of a stream into a linked list until encountering a given stopword */
 	void readSection(StreamReader stream, LinkedList ll)
@@ -18,7 +18,7 @@ public class Helpers : MonoBehaviour
 		if (line != "#stop")
 		{
 			ll.addNode(line);
-			readSection(stream, ll);
+			readSection(stream, ll); //Recursive call
 		}
 	}
 
@@ -37,7 +37,7 @@ public class Helpers : MonoBehaviour
 		Reads graph data from a file, distributes it among vertices, randomly connects the vertices
 		Takes a reference to a graph object and the number of vertices to generate
 	*/
-	public void buildGraph(Graph gameGraph, int vertexCount)
+	internal void buildGraph(Graph gameGraph, int vertexCount)
 	{
 		StreamReader stream = new StreamReader("Assets/DataFiles/graphData.cyb"); //Initializes a stream and opens a predefined data file
 
@@ -53,9 +53,7 @@ public class Helpers : MonoBehaviour
 		{
 			switch (line)
 			{
-				/*
-					Looks for starting points of sections in my file, skips to the next line unless one is located
-				*/
+				/* Looks for starting points of sections in my file, skips to the next line unless one is located. */
 				case "#NameStart":
 					readSection(stream, names);
 					break;
