@@ -46,6 +46,24 @@ using UnityEngine;
 		track whether tipCache in the graph is full. If it is, disable the button for requesting tips
 		cache for the chosen node has to be randomized
 
+		!!!Add more names to minimize the odds of rolling the same name twice
+
+		Spotlight to makes vertices project shadows
+
+		Don't need to algorithmically connect the visual vertices, the players will do it themselves.
+
+
+
+
+	IMMEDIATE:
+	Show profile names on top of the vertices.
+	Canvases for profiles and profile info. Use the presentation layout.
+	More names
+
+
+
+
+
 	UNIMPLEMENTED:
 		Graph --> getTip() --> Mode 1
 
@@ -63,21 +81,27 @@ using UnityEngine;
 	Queue -- generic
 */
 
-public class driver : MonoBehaviour //MonoBehaviour is the base class of Unity, from which every other script derives
+public class driver : MonoBehaviour
 {
-	internal Helpers help = new Helpers(); //I am calling the helper functions I need through this instance, seeing how I can't inherit from both MonoBehavior and Helpers
-
-	StackLL testStack = new StackLL();
-	LinkedList testList = new LinkedList(); //not tested yet
-	Graph testGraph = new Graph(15);
-	HashTable testTable = new HashTable(7);
+	internal Helpers helpers = new Helpers(); //I am calling the helper functions I need through this instance, seeing how I can't inherit from both MonoBehavior and Helpers
+	public List<GameObject> visualVertices;
+	internal Graph gameGraph;
+	int size;
 
 	void Start()
 	{
-		help.buildGraph(testGraph);
+		size = 30;
+		visualVertices = new List<GameObject>();
+		gameGraph = helpers.buildGraph(size);
+		int temp = 0; //Used as a counter for building a visual graph
 
-		testGraph.printVertices();
-		testGraph.graphValid();
+		/* This call goes to the pre-exiting GameObject with an attached visualVertex script and builds up the graph from there. All vertices are added into the visualVertices List */
+		transform.GetChild(0).transform.GetChild(0).gameObject.GetComponent<visualVertex>().buildVisualGraph(0, 0, 0, ref temp, gameGraph.getSize(), ref visualVertices);
+
+		//VISUAL NODES ARE JUST BUTTONS WHICH UPDATE VERTEX VIEW WINDOW AND SHOW VISUAL CLUES BASED ON COMPLETION
+
+
+		gameGraph.printVertices();
 	}
 
 	// Update is called once per frame

@@ -90,7 +90,7 @@ internal class Graph
 	}
 
 	/* Returns a reference to the vertex under a given index */
-	internal Vertex findVertex(int _index)
+	internal Vertex getVertex(int _index)
 	{
 		Vertex vx = null;
 		if (_index < vertices.Count)
@@ -99,7 +99,7 @@ internal class Graph
 		}
 		else
 		{
-			Debug.Log("Graph.findVertex(): index exceeds the number of vertices.");
+			Debug.Log("Graph.getVertex(): index exceeds the number of vertices.");
 		}
 
 		return vx;
@@ -218,7 +218,7 @@ internal class Graph
 				vx.misc[1] + "\n" +
 				vx.misc[2] + "\n" +
 				"Access: " + vx.fieldAccess[0] + " " + vx.fieldAccess[1] + " " + vx.fieldAccess[2] + " " + vx.fieldAccess[3] + " " + vx.fieldAccess[4] + "\n" +
-				"Edges: " + edges + "\n"
+				"Edges: " + vx.edgeCount + " (" + edges + ")\n"
 			);
 			index++;
 		}
@@ -249,7 +249,7 @@ internal class Graph
 	}
 
 	/* Validates the graph through BFT */
-	internal bool graphValid()
+	internal bool graphConnected()
 	{
 		bool valid = true;
 		bool[] visited = new bool[size];
@@ -266,9 +266,6 @@ internal class Graph
 			if (!visited[i])
 				valid = false;
 		}
-
-		if (valid)
-			Debug.Log("The graph is connected.");
 
 		return valid;
 	}

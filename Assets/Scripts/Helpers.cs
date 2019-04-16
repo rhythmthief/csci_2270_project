@@ -10,7 +10,7 @@ using System.IO; //Contains the StreamReader class
 
 internal class Helpers
 {
-	/* A helper function which reads a section of a stream into a linked list until encountering a given stopword. Takes a StreamReader object and a List of strings to insert elements into. */
+	/* A helper function which reads a section of a stream into a List until encountering a given stopword. Takes a StreamReader object and a List of strings to insert elements into. */
 	void readSection(StreamReader stream, List<string> list)
 	{
 		string line = stream.ReadLine();
@@ -25,7 +25,7 @@ internal class Helpers
 	/* Rolls elements for a new vertex and adds it to the graph.
 	Takes the primary Graph object of the game, Lists for read data and count for the current number of generated profiles.
 	Recursive. */
-	void generateProfile(Graph gameGraph, HashTable usedNames, List<string> names, List<string> countries, List<string> misc, int count)
+	void generateVertex(Graph gameGraph, HashTable usedNames, List<string> names, List<string> countries, List<string> misc, int count)
 	{
 		HashTable usedMisc = new HashTable(7); //A table which saves rolled misc for each user
 		string[] newMisc = new string[3]; //This array will store rolled misc
@@ -33,11 +33,12 @@ internal class Helpers
 		int miscCount = 0; //I'll roll a total of 3 misc items
 		int nameIndex = Random.Range(0, names.Count); //I'll need to save indices for names
 
-		if (usedNames == null) //I'll initialize the hash table in case if this is the first call of generateProfile()
+		if (usedNames == null) //I'll initialize the hash table in case if this is the first call of generateVertex()
 			usedNames = new HashTable(7); //I'll be using this hash table to save indexes of used names in order to avoid duplicates in the graph during generation
 
-		/* Rolling a name */
-		while (usedNames.searchItem(nameIndex)) //I'll keep rolling until I get a unique name that's not already in a hash table
+		/* Rolling a name.
+		I'll keep rolling until I get a unique name that's not already in a hash table. The number of available names will generally be much larger than the number of vertices we can generate, so long streaks of bad rolls (repeats) are unlikely. */
+		while (usedNames.searchItem(nameIndex))
 			nameIndex = Random.Range(0, names.Count);
 
 		usedNames.insertItem(nameIndex); //I'll be saving the index of a used name in a hash table which gets passed down to the next call
@@ -57,12 +58,12 @@ internal class Helpers
 		gameGraph.addVertex(names[nameIndex], countries[Random.Range(0, countries.Count)], newMisc);
 		gameGraph.openField(gameGraph.getCount() - 1, Random.Range(1, 4)); //We'll also make a random non-name field accessible the player
 
-
 		count++; //Counts how many profiles have been generated so far
-			    /* Recursive call to generate the next graph node */
+
+		/* Recursive call to generate the next graph node */
 		if (count < gameGraph.getSize())
 		{
-			generateProfile(gameGraph, usedNames, names, countries, misc, count);
+			generateVertex(gameGraph, usedNames, names, countries, misc, count);
 		}
 	}
 
@@ -92,9 +93,9 @@ internal class Helpers
 		/* First, I need to make sure the vertex is connected to the big graph I am building. If the check above failed and this vertex is not present in the hash table yet, I will make one random roll and connect it to one of the previously processed elements (which are guaranteed to be connected) */
 		if (!vxValid)
 		{
-			gameGraph.insertEdge(index, Random.Range(0, index-1)); //The bias for connecting nodes with smaller index is counteracted by increasing chance of connection to nodes of greater index down below
+			gameGraph.insertEdge(index, Random.Range(0, index - 1)); //The bias for connecting nodes with smaller index is counteracted by increasing chance of connection to nodes of greater index down below
 			connected.insertItem(index); //And now I'll add this element to the hash table
-			//vxValid = true;
+								    //vxValid = true;
 		}
 
 		//Now it's time to roll other edges
@@ -102,7 +103,7 @@ internal class Helpers
 		{
 			if (i != index) //Vertices are not allowed to be connected to themselves
 			{
-				roll = Random.Range(i/2, gameGraph.getSize()); //Higher chance to connect to nodes of a greater index
+				roll = Random.Range(i / 2, gameGraph.getSize()); //Higher chance to connect to nodes of a greater index
 
 				if (roll == i)
 				{
@@ -111,7 +112,7 @@ internal class Helpers
 				}
 
 				//A limit on the maximum number of edges a node can accumulate through these rolls
-				if (gameGraph.getVertexEdgeCount(index) == 4)
+				if (gameGraph.getVertexEdgeCount(index) == 2)
 					break;
 			}
 		}
@@ -127,10 +128,11 @@ internal class Helpers
 
 
 	/* 	Can be accessed from outside of this class
-		Reads graph data from a file, distributes it among vertices, randomly connects the vertices.
-		Takes a reference to a graph object */
-	internal void buildGraph(Graph gameGraph)
+		Reads graph data from a file, distributes it among vertices, randomly connects the vertices. 
+		Takes the size of a graph to generate. Returns a populated Graph object.*/
+	internal Graph buildGraph(int _size)
 	{
+		Graph gameGraph = new Graph(_size);
 		StreamReader stream = new StreamReader("Assets/DataFiles/graphData.cyb"); //Initializes a stream and opens a predefined data file
 
 		//I considered using a linked list to store names for generation, but ultimately decided ot use standardLists instead because I intend to roll random indexes later, so lookup would've been inefficient compared to a list
@@ -139,32 +141,44 @@ internal class Helpers
 		List<string> misc = new List<string>();
 		string line;
 
-		/* I will be storing contents of my file in lists for later manipulation */
-		while ((line = stream.ReadLine()) != null) //StreamReader returns a null once it reaches the end of an input
+		if (_size > 0) //Makes sure there's at least 1 element to insert
 		{
-			switch (line)
+			/* I will be storing contents of my file in lists for later manipulation */
+			while ((line = stream.ReadLine()) != null) //StreamReader returns a null once it reaches the end of an input
 			{
-				/* Looks for starting points of sections in the data file. */
-				case "#names":
-					readSection(stream, names);
-					break;
+				switch (line)
+				{
+					/* Looks for starting points of sections in the data file. */
+					case "#names":
+						readSection(stream, names);
+						break;
 
-				case "#countries":
-					readSection(stream, countries);
-					break;
+					case "#countries":
+						readSection(stream, countries);
+						break;
 
-				case "#misc":
-					readSection(stream, misc);
-					break;
+					case "#misc":
+						readSection(stream, misc);
+						break;
+				}
+			}
+
+			generateVertex(gameGraph, null, names, countries, misc, 0); //Generating new vertices for the graph, recursive
+			generateEdge(gameGraph, null, 0); //Rolling edges for the graph, recursive
+
+			/* As a final step, I am going to verify that the newly generated graph is connected. There's logics in generateEdge() method to ensure that the graph does turn out to be connected, but it never hurts to make sure. If the graph is somehow not connected (which should never be the case), I am going to recursively run this function again.
+			Note: running again WOULD technically do unnecessary work to read the file again, but since the graph is guaranteed to be connected unless some unforeseen logical error I didn't account for takes place, it is highly unlikely that the recursive call will ever take place. Still, the functionality for the graph to game to heal itself is there! */
+			if (gameGraph.graphConnected())
+			{
+				Debug.Log("The Graph is connected. Generation successful.");
+			}
+			else
+			{
+				Debug.Log("The generated graph is disconnected. Running a recursive call...");
+				return buildGraph(_size);
 			}
 		}
 
-		generateProfile(gameGraph, null, names, countries, misc, 0);
-		generateEdge(gameGraph, null, 0);
-		//NOW DISTRIBUTE THE EDGES
+		return gameGraph; //Once the generation is complete and the graph is connected, we'll return it
 	}
-
-
-	//WHEN CONNECTING EDGES, MAKE SURE THAT THE ENTIRE GRAPH IS CONNECTED (THERE ARE NO DISCONNECTED ELEMENTS)
-	//SHOULD I VERIFY ALGORITHMICALLY BY TRAVERSING THE ENTIRE GRAPH?
 }

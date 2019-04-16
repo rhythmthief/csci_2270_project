@@ -1,7 +1,7 @@
 #Contains data necessary to build a graph.
 #Each node will contain a name, a country and three misc fields
 
-#Names the file: 30
+#Names the file: 31
 
 #names
 Musa Warren
@@ -34,6 +34,7 @@ Genichiro Ashina
 Gyoubu Oniwa
 JC Denton
 Venkat Kapoor
+Yuri Katsuki
 #stop
 
 #countries
