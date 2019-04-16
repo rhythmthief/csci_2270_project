@@ -1,14 +1,14 @@
 #Contains data necessary to build a graph.
 #Each node will contain a name, a country and three misc fields
 
-#Names in this file: 30
+#Names the file: 30
 
-#NameStart
+#names
 Musa Warren
 Charlie Bronson
 Elsie-Rose Oneill
 Kai Weber
-Jodi	Jassen
+Jodi Jassen
 Elsa Eriksson
 Alfred Dreyfus
 Billy Pilgrim
@@ -29,7 +29,6 @@ Craig Boone
 Wallace Breen
 Robert House
 Gordon Freeman
-Jack of Blades
 Andrew Ryan
 Genichiro Ashina
 Gyoubu Oniwa
@@ -37,7 +36,7 @@ JC Denton
 Venkat Kapoor
 #stop
 
-#CountryStart
+#countries
 USA
 England
 Germany
@@ -50,7 +49,7 @@ Poland
 Japan
 #stop
 
-#MiscStart
+#misc
 Has three cats
 Sentenced to life in prison
 Watches soap operas
@@ -67,7 +66,7 @@ Piloted a spacecraft
 Has burn scars
 Earned a Ph.D. in physics
 Loves their spouse
-Helped establish a new regime in Eastern Europe
+Established a new regime in Eastern Europe
 Knows all about Geralt of Rivia
 Wasn't appreciated during his time
 Has an older brother

@@ -57,7 +57,7 @@
 "editor.tabSize": 5,
 "editor.detectIndentation": false,
 "editor.wordWrap": "on",
-"workbench.colorTheme": "Sapphire (Dim)",
+"workbench.colorTheme": "Shark Dark",
 "workbench.iconTheme": "material-icon-theme",
 "workbench.editor.highlightModifiedTabs": true,
 "cSpell.language": "en",

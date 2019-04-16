@@ -14,19 +14,16 @@ internal class Vertex
 	internal string name;
 	internal string country;
 	internal string[] misc; //Holds strings of miscellaneous information
-	internal bool[] fieldAccess; //Tracks whether a particular field from above can be accessed by the player
+	internal bool[] fieldAccess = { false, false, false, false, false }; //Tracks whether a particular field from above can be accessed by the player
 	internal StackLL tipCache; //This stack stores all tips that can be accessible via this vertex
 	internal LinkedList tipShown; //A linked list which contains tips which have been popped from the tipCache stack
-
-
-
+	internal int edgeCount = 0;
 	/* Parameterized constructor for a vertex */
-	internal Vertex(string _name, string _country, string[] _misc, bool[] _miscAccess)
+	internal Vertex(string _name, string _country, string[] _misc)
 	{
 		name = _name;
 		country = _country;
 		misc = _misc;
-		fieldAccess = _miscAccess;
 	}
 };
 
@@ -34,7 +31,7 @@ internal class Vertex
 internal class Graph
 {
 	private List<Vertex> vertices;
-	private int[,] matrix;
+	private bool[,] matrix;
 	private int size; //Represents the size of a single dimension
 
 	/*
@@ -47,38 +44,46 @@ internal class Graph
 		0	0	0	1	0
 	*/
 
+	#region STANDARD
 	internal Graph(int _size)
 	{
 		size = _size;
-		matrix = new int[size, size];
+		matrix = new bool[size, size];
+		vertices = new List<Vertex>();
 
 		//I need to zero out the adjacency matrix first
 		for (int i = 0; i < size; i++)
 			for (int j = 0; j < size; j++)
-				matrix[i, j] = 0;
+				matrix[i, j] = false;
 	}
 
 	/* Inserts a new vertex at the end of the <Vertex> list */
-	internal void addVertex(string _name, string _country, string[] _misc, bool[] _miscOpen)
+	internal void addVertex(string _name, string _country, string[] _misc)
 	{
-		Vertex newVx = new Vertex(_name, _country, _misc, _miscOpen);
+		Vertex newVx = new Vertex(_name, _country, _misc);
+		vertices.Add(newVx);
 	}
 
 	/* Inserts an edge between two vertices.
 	Takes indexes of corresponding vertices.
-	0 -- no edge; 1 -- edge is present */
+	false -- no edge; true -- edge is present */
 	internal void insertEdge(int vx0, int vx1)
 	{
-		matrix[vx0, vx1] = 1;
-		matrix[vx1, vx0] = 1; //The matrix has to be symmetrical relative to the main diagonal, since my edges are undirected
+		if (!findEdge(vx0, vx1)) //Making sure the elements aren't already connected
+		{
+			vertices[vx0].edgeCount++;
+			vertices[vx1].edgeCount++;
+			matrix[vx0, vx1] = true;
+			matrix[vx1, vx0] = true; //The matrix has to be symmetrical relative to the main diagonal, since my edges are undirected
+		}
 	}
 
 	/* Checks whether two vertices share an edge. Since my graph is undirected, I'll only check it one way */
-	internal bool checkAdjacency(int vx0, int vx1)
+	internal bool findEdge(int vx0, int vx1)
 	{
 		bool adjacent = false;
 
-		if (matrix[vx0, vx1] == 1) //I only need to check one side, since edges are undirected
+		if (matrix[vx0, vx1] == true) //I only need to check one side, since edges are undirected
 			adjacent = true;
 
 		return adjacent;
@@ -101,22 +106,40 @@ internal class Graph
 
 	}
 
+	/* Returns the maximum size of the graph */
+	internal int getSize()
+	{
+		return size;
+	}
 
+	/* Returns the current number of elements in the graph */
+	internal int getCount()
+	{
+		return vertices.Count;
+	}
+
+	internal int getVertexEdgeCount(int index)
+	{
+		return vertices[index].edgeCount;
+	}
+	#endregion
+
+	#region GAME
 	/* GAME-SPECIFIC METHODS */
 
 	/* Makes data of a vertex accessible to the player.
 	Takes the index of a vertex and the index of a misc string.
 	Passing -1 as the latter makes all misc strings accessible. */
-	internal void setMisc(int _index, int _miscIndex)
+	internal void openField(int _index, int _fieldIndex)
 	{
 		/* Fields:
 			0 -- name
 			1 -- country
-			2-5 -- misc */
+			2-4 -- misc */
 
-		if (_miscIndex != -1)
+		if (_fieldIndex != -1)
 		{
-			vertices[_index].fieldAccess[_miscIndex] = true;
+			vertices[_index].fieldAccess[_fieldIndex] = true;
 		}
 		else
 		{
@@ -141,7 +164,7 @@ internal class Graph
 			{
 				for (int i = 0; i < size; i++)
 				{
-					if (matrix[_index, i] == 1)
+					if (matrix[_index, i] == true)
 					{
 						//Pushes country first as it will be the last tip a user can receive about a node
 						vertices[_index].tipCache.push(vertices[i].country);
@@ -167,4 +190,89 @@ internal class Graph
 
 		return null;
 	}
+	#endregion
+
+	#region DEBUGGING
+	/* DEBUG METHODS */
+
+	/* Prints out all node data and edges as a console entry. */
+	internal void printVertices()
+	{
+		int index = 0;
+		string edges;
+
+		foreach (Vertex vx in vertices)
+		{
+			edges = "";
+			for (int i = 0; i < size; i++)
+			{
+				//Concatenates edges in a string
+				edges = edges + " " + matrix[index, i];
+			}
+
+			//All data related to a node is neatly packed in a console entry
+			Debug.Log(
+				index + " " + vx.name + "\n" +
+				vx.country + "\n" +
+				vx.misc[0] + "\n" +
+				vx.misc[1] + "\n" +
+				vx.misc[2] + "\n" +
+				"Access: " + vx.fieldAccess[0] + " " + vx.fieldAccess[1] + " " + vx.fieldAccess[2] + " " + vx.fieldAccess[3] + " " + vx.fieldAccess[4] + "\n" +
+				"Edges: " + edges + "\n"
+			);
+			index++;
+		}
+	}
+
+	internal void BFT(bool[] visited)
+	{
+		Queue<int> vxQueue = new Queue<int>(); //I'll use a generic queue for BFT
+		int vx = 0;
+		//BFT will start with index 0
+
+		vxQueue.Enqueue(0);
+		visited[0] = true;
+
+		while (vxQueue.Count != 0)
+		{
+			vx = vxQueue.Dequeue();
+
+			for (int i = 0; i < size; i++)
+			{
+				if (matrix[vx, i] == true && visited[i] == false)
+				{
+					visited[i] = true;
+					vxQueue.Enqueue(i);
+				}
+			}
+		}
+	}
+
+	/* Validates the graph through BFT */
+	internal bool graphValid()
+	{
+		bool valid = true;
+		bool[] visited = new bool[size];
+
+		for (int i = 0; i < size; i++)
+			visited[i] = false;
+
+
+		BFT(visited);
+
+		//Time to check whether every vertex has been visited
+		for (int i = 0; i < size; i++)
+		{
+			if (!visited[i])
+				valid = false;
+		}
+
+		if (valid)
+			Debug.Log("The graph is connected.");
+
+		return valid;
+	}
+	#endregion
 };
+
+

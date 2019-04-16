@@ -131,4 +131,15 @@ class LinkedList
 			Debug.Log("LinkedList.deleteKey(): out of bounds.");
 		}
 	}
+
+	internal void printConsole()
+	{
+		LLNode walker = head;
+
+		while (walker != null)
+		{
+			Debug.Log(walker.key);
+			walker = walker.next;
+		}
+	}
 }

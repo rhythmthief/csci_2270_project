@@ -52,37 +52,32 @@ using UnityEngine;
 	FULLY IMPLEMENTED:
 		StackLL
 		LinkedList
+		Graph generation
 
-
+	DS Used:
+	Graph
+	HashTable
+	LinkedList
+	StackLL
+	List (vector) -- generic
+	Queue -- generic
 */
 
 public class driver : MonoBehaviour //MonoBehaviour is the base class of Unity, from which every other script derives
 {
-	internal Helpers help; //I am calling the helper functions I need through this instance, seeing how I can't inherit from both MonoBehavior and Helpers
+	internal Helpers help = new Helpers(); //I am calling the helper functions I need through this instance, seeing how I can't inherit from both MonoBehavior and Helpers
 
 	StackLL testStack = new StackLL();
 	LinkedList testList = new LinkedList(); //not tested yet
 	Graph testGraph = new Graph(15);
+	HashTable testTable = new HashTable(7);
 
 	void Start()
 	{
-		//int test;
-		//test = help.readGameData();
-		//Application.targetFrameRate = 65; //Just a precaution in case v-sync isn't active on a machine
-		
-		for (int i = 0; i < 10; i++)
-		{
-			testList.addNode("" + i);
-		}
+		help.buildGraph(testGraph);
 
-		// testStack.print();
-		
-		/*
-			CONNECTIONS WILL BE DISTRIBUTED RANDOMLY, BUT EACH NODE HAS AT LEAST ONE
-
-			LET THE PLAYER PICK THE NUMBER OF VERTICES AS DIFFICULTIES
-		*/
-
+		testGraph.printVertices();
+		testGraph.graphValid();
 	}
 
 	// Update is called once per frame
