@@ -1,7 +1,7 @@
 #Contains data necessary to build a graph.
 #Each node will contain a name, a country and three misc fields
 
-#Names the file: 31
+#Names the file: 36
 
 #names
 Musa Warren
@@ -33,8 +33,13 @@ Andrew Ryan
 Genichiro Ashina
 Gyoubu Oniwa
 JC Denton
+Bobby Newmark
+Armitage Corto
+William Gibson
 Venkat Kapoor
 Yuri Katsuki
+Jeff Tweedy
+Travis Bickle
 #stop
 
 #countries

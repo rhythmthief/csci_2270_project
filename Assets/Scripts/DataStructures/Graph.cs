@@ -24,6 +24,8 @@ internal class Vertex
 		name = _name;
 		country = _country;
 		misc = _misc;
+		tipCache = new StackLL();
+		tipShown = new LinkedList();
 	}
 };
 

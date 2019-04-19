@@ -48,10 +48,9 @@ using UnityEngine;
 
 		!!!Add more names to minimize the odds of rolling the same name twice
 
-		Spotlight to makes vertices project shadows
-
 		Don't need to algorithmically connect the visual vertices, the players will do it themselves.
 
+		Visual connections: use light particles. Give a slight push along Y and have them converge on the target vertex
 
 
 
@@ -59,9 +58,17 @@ using UnityEngine;
 	Show profile names on top of the vertices.
 	Canvases for profiles and profile info. Use the presentation layout.
 	More names
+	Timer (not necessarily integrated yet)
+	Player-driven traversal starts from the LAST node in the graph --> increasing difficulty, easier start
 
+	THE LAST NODE IS ALWAYS FULLY UNLOCKED EXCEPT FOR THE NAME
+	Serves as a tutorial for the player.
 
+	REVEALING LOGICS: go over the adjacency matrix for a vertex and enable all adjacent vertices (otherwise the game objects are disabled)
 
+	Animation: tween from the bottom
+
+	Particle system: flag each edge to prevent 2 PS doing the same thing
 
 
 	UNIMPLEMENTED:
@@ -90,7 +97,7 @@ public class driver : MonoBehaviour
 
 	void Start()
 	{
-		size = 30;
+		size = 15;
 		visualVertices = new List<GameObject>();
 		gameGraph = helpers.buildGraph(size);
 		int temp = 0; //Used as a counter for building a visual graph
@@ -99,7 +106,6 @@ public class driver : MonoBehaviour
 		transform.GetChild(0).transform.GetChild(0).gameObject.GetComponent<visualVertex>().buildVisualGraph(0, 0, 0, ref temp, gameGraph.getSize(), ref visualVertices);
 
 		//VISUAL NODES ARE JUST BUTTONS WHICH UPDATE VERTEX VIEW WINDOW AND SHOW VISUAL CLUES BASED ON COMPLETION
-
 
 		gameGraph.printVertices();
 	}

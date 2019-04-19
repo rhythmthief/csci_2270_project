@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 internal class visualVertex : MonoBehaviour
 {
@@ -32,32 +33,21 @@ internal class visualVertex : MonoBehaviour
 
 		if (level != levelIndex && totalCount < size) //Recursive calls to finish a level will stop once this condition fails
 		{
-			newVertex = Instantiate(vertexPrefab, transform.position + new Vector3 (3,0,0), transform.rotation);
+			newVertex = Instantiate(vertexPrefab, transform.position + new Vector3 (5,0,0), transform.rotation);
 			newVertex.transform.SetParent(this.gameObject.transform.parent);
 			newVertex.GetComponent<visualVertex>().buildVisualGraph(totalCount, level, levelIndex+1, ref totalCount, size, ref vertices);
 		}
 
 		if (levelIndex == 0 && totalCount < size) //Index 0 belongs to the first element in a level, we'll use it to "jump" to the next level and start generation again
 		{
-			newVertex = Instantiate(vertexPrefab, transform.position + new Vector3 (-1.5f, 0, 3), transform.rotation);
+			newVertex = Instantiate(vertexPrefab, transform.position + new Vector3 (-2.5f, 0, 5), transform.rotation);
 			newVertex.transform.SetParent(this.gameObject.transform.parent);
 			newVertex.GetComponent<visualVertex>().buildVisualGraph(totalCount, level+1, 0, ref totalCount, size, ref vertices);
 		}
 	}
 
-
-
-	// Start is called before the first frame update
-	void Start()
+	/* Called when a collider of the object registers a mouse click */
+	void OnMouseDown()
 	{
-		//this.transform.Rotate(0, 90, 0);
-		//this.gameObject.transform.forward();
-	}
-
-	// Update is called once per frame
-	void Update()
-	{
-		//transform.Rotate(new Vector3(0, -1, 0) * Time.deltaTime * 5, Space.World);
-		//transform.Translate(Vector3.forward, Space.Self);
 	}
 }

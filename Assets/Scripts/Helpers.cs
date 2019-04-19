@@ -56,7 +56,17 @@ internal class Helpers
 
 		//Now that all elements have been rolled, we can finally add a new vertex
 		gameGraph.addVertex(names[nameIndex], countries[Random.Range(0, countries.Count)], newMisc);
-		gameGraph.openField(gameGraph.getCount() - 1, Random.Range(1, 4)); //We'll also make a random non-name field accessible the player
+
+		if (count < gameGraph.getSize() - 1)
+		{
+			gameGraph.openField(gameGraph.getCount() - 1, Random.Range(1, 4)); //We'll also make a random non-name field accessible the player
+		}
+		else
+		{
+			//If we are generating the last element of the graph, we need to reveal every field except for the name -- this node will serve as a tutorial
+			for (int i = 1; i < 5; i++)
+				gameGraph.openField(gameGraph.getCount() - 1, i);
+		}
 
 		count++; //Counts how many profiles have been generated so far
 
