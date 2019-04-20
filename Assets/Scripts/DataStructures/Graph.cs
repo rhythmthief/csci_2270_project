@@ -15,17 +15,20 @@ internal class Vertex
 	internal string country;
 	internal string[] misc; //Holds strings of miscellaneous information
 	internal bool[] fieldAccess = { false, false, false, false, false }; //Tracks whether a particular field from above can be accessed by the player
-	internal StackLL tipCache; //This stack stores all tips that can be accessible via this vertex
-	internal LinkedList tipShown; //A linked list which contains tips which have been popped from the tipCache stack
+	internal StackLL clueCache; //This stack stores all tips that can be accessible via this vertex
+	internal LinkedList clueShown; //A linked list which contains tips which have been popped from the clueCache stack
 	internal int edgeCount = 0;
+	internal GameObject visual; //Visual representation of the vertex in-game
+
+
 	/* Parameterized constructor for a vertex */
 	internal Vertex(string _name, string _country, string[] _misc)
 	{
 		name = _name;
 		country = _country;
 		misc = _misc;
-		tipCache = new StackLL();
-		tipShown = new LinkedList();
+		clueCache = new StackLL();
+		clueShown = new LinkedList();
 	}
 };
 
@@ -46,6 +49,7 @@ internal class Graph
 		0	0	0	1	0
 	*/
 
+	/* Methods expected in a graph implementation */
 	#region STANDARD
 	internal Graph(int _size)
 	{
@@ -124,10 +128,46 @@ internal class Graph
 	{
 		return vertices[index].edgeCount;
 	}
+
+	/* Traverses to a certain depth from a given vertex and enables GameObjects. One of two overloads of BFT. */
+	internal void BFT(int _vx, int depth)
+	{
+		Queue<int> vxQueue = new Queue<int>(); //I'll use a generic queue for BFT
+		int vx = _vx;
+		//BFT will start with index 0
+
+		vxQueue.Enqueue(vx);
+
+		while (vxQueue.Count != 0 && depth != 0)
+		{
+			vx = vxQueue.Dequeue();
+			depth--;
+
+			for (int i = 0; i < size; i++)
+			{
+				if (matrix[vx, i] == true && vertices[i].visual.gameObject.activeSelf == false) //activeSelf returns true if the game object is active
+				{
+					vertices[i].visual.gameObject.SetActive(true);
+					vxQueue.Enqueue(i);
+				}
+			}
+		}
+	}
+
 	#endregion
 
-	#region GAME
+
+
 	/* GAME-SPECIFIC METHODS */
+	#region GAME
+
+	/* Assigns a visual component of the vertex.
+	Takes an index of a vertex and GameObject to assign. */
+	internal void setVisual(int _index, GameObject _visual)
+	{
+		vertices[_index].visual = _visual;
+	}
+
 
 	/* Makes data of a vertex accessible to the player.
 	Takes the index of a vertex and the index of a misc string.
@@ -162,27 +202,27 @@ internal class Graph
 		if (!mode) //Mode 0, used for the majority of the game
 		{
 			//I am caching all tips in a stack for ease of use. If this statement passes, it means that the cache hasn't been built yet.
-			if (vertices[_index].tipCache.isEmpty() && vertices[_index].tipShown.isEmpty())
+			if (vertices[_index].clueCache.isEmpty() && vertices[_index].clueShown.isEmpty())
 			{
 				for (int i = 0; i < size; i++)
 				{
 					if (matrix[_index, i] == true)
 					{
-						//Pushes country first as it will be the last tip a user can receive about a node
-						vertices[_index].tipCache.push(vertices[i].country);
+						//Pushes country first as it will be the last clue a user can receive about a node
+						vertices[_index].clueCache.push(vertices[i].country);
 
 						//And then pushes the misc data
 						for (int j = 0; j < 3; j++)
-							vertices[_index].tipCache.push(vertices[i].misc[j]);
+							vertices[_index].clueCache.push(vertices[i].misc[j]);
 					}
 
 				}
 			}
 
-			//Once the player requests a tip, it gets popped from a cache stack and added to a linked list, which is then displayed in-game
-			if (!vertices[_index].tipCache.isEmpty())
+			//Once the player requests a clue, it gets popped from a cache stack and added to a linked list, which is then displayed in-game
+			if (!vertices[_index].clueCache.isEmpty())
 			{
-				vertices[_index].tipShown.addNode(vertices[_index].tipCache.pop());
+				vertices[_index].clueShown.addNode(vertices[_index].clueCache.pop());
 			}
 		}
 		else
@@ -226,30 +266,6 @@ internal class Graph
 		}
 	}
 
-	internal void BFT(bool[] visited)
-	{
-		Queue<int> vxQueue = new Queue<int>(); //I'll use a generic queue for BFT
-		int vx = 0;
-		//BFT will start with index 0
-
-		vxQueue.Enqueue(0);
-		visited[0] = true;
-
-		while (vxQueue.Count != 0)
-		{
-			vx = vxQueue.Dequeue();
-
-			for (int i = 0; i < size; i++)
-			{
-				if (matrix[vx, i] == true && visited[i] == false)
-				{
-					visited[i] = true;
-					vxQueue.Enqueue(i);
-				}
-			}
-		}
-	}
-
 	/* Validates the graph through BFT */
 	internal bool graphConnected()
 	{
@@ -271,7 +287,31 @@ internal class Graph
 
 		return valid;
 	}
+
+	/* Traverses the graph in breadth-first fashion and marks vertices as visited. One of two overloads of BFT. */
+	internal void BFT(bool[] visited)
+	{
+		Queue<int> vxQueue = new Queue<int>(); //I'll use a generic queue for BFT
+		int vx = 0;
+		//BFT will start with index 0
+
+		vxQueue.Enqueue(vx);
+		visited[0] = true;
+
+		while (vxQueue.Count != 0)
+		{
+			vx = vxQueue.Dequeue();
+
+			for (int i = 0; i < size; i++)
+			{
+				if (matrix[vx, i] == true && visited[i] == false)
+				{
+					visited[i] = true;
+					vxQueue.Enqueue(i);
+				}
+			}
+		}
+	}
+
 	#endregion
 };
-
-

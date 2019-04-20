@@ -20,10 +20,10 @@ class LLNode
 	}
 
 	/* For debugging only */
-	~LLNode()
-	{
-		//Debug.Log("Deleting " + key);
-	}
+	// ~LLNode()
+	// {
+	// 	Debug.Log("Deleting " + key);
+	// }
 }
 
 /* Doubly lineked list */
@@ -95,6 +95,23 @@ class LinkedList
 		{
 			return null;
 		}
+	}
+
+	internal string getAllKeys()
+	{
+		string data = "";
+		LLNode walker = head;
+
+		if (!isEmpty())
+		{
+			while (walker != null)
+			{
+				data = data + walker.key + "\n";
+				walker = walker.next;
+			}
+		}
+
+		return data;
 	}
 
 	/* Deletes a node under the given index */

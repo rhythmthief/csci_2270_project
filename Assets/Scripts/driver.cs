@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 /*
 	Notes:
@@ -57,12 +58,8 @@ using UnityEngine;
 	IMMEDIATE:
 	Show profile names on top of the vertices.
 	Canvases for profiles and profile info. Use the presentation layout.
-	More names
 	Timer (not necessarily integrated yet)
 	Player-driven traversal starts from the LAST node in the graph --> increasing difficulty, easier start
-
-	THE LAST NODE IS ALWAYS FULLY UNLOCKED EXCEPT FOR THE NAME
-	Serves as a tutorial for the player.
 
 	REVEALING LOGICS: go over the adjacency matrix for a vertex and enable all adjacent vertices (otherwise the game objects are disabled)
 
@@ -70,6 +67,12 @@ using UnityEngine;
 
 	Particle system: flag each edge to prevent 2 PS doing the same thing
 
+	Re-enable GameObjects as the graph is being traversed
+
+
+	DESIGN CHANGE -- reveal only nodes one edge away instead of 2. Update the loop info above.
+	PARTICLES -- lower quantity (1-2 particles) with trails moving around force fields.
+	VERIFICATION: Send node indexes,the function takes value from a dropdown box by itself
 
 	UNIMPLEMENTED:
 		Graph --> getTip() --> Mode 1
@@ -91,27 +94,60 @@ using UnityEngine;
 public class driver : MonoBehaviour
 {
 	internal Helpers helpers = new Helpers(); //I am calling the helper functions I need through this instance, seeing how I can't inherit from both MonoBehavior and Helpers
-	public List<GameObject> visualVertices;
+	public GameObject menu; //GameObject which collects the menu components for vertex interaction
 	internal Graph gameGraph;
 	int size;
 
 	void Start()
 	{
 		size = 15;
-		visualVertices = new List<GameObject>();
 		gameGraph = helpers.buildGraph(size);
+
 		int temp = 0; //Used as a counter for building a visual graph
-
-		/* This call goes to the pre-exiting GameObject with an attached visualVertex script and builds up the graph from there. All vertices are added into the visualVertices List */
-		transform.GetChild(0).transform.GetChild(0).gameObject.GetComponent<visualVertex>().buildVisualGraph(0, 0, 0, ref temp, gameGraph.getSize(), ref visualVertices);
-
-		//VISUAL NODES ARE JUST BUTTONS WHICH UPDATE VERTEX VIEW WINDOW AND SHOW VISUAL CLUES BASED ON COMPLETION
+				    /* This call goes to the pre-exiting GameObject with an attached visualVertex script and builds up the graph from there. All vertices are added into the visualVertices List */
+		transform.GetChild(0).GetChild(0).gameObject.GetComponent<visualVertex>().buildVisualGraph(0, 0, 0, ref temp, gameGraph.getSize(), gameGraph);
 
 		gameGraph.printVertices();
+
+		menu = transform.GetChild(1).GetChild(0).gameObject; //Sets a reference to the object with vertex menu elements
+
+		updateMenuStatic();
 	}
 
-	// Update is called once per frame
-	void Update()
+	/* Updates the active vertex menu based on a selected vertex */
+	internal void updateMenuActive(int _id)
 	{
+		//I'll need to check if it's revealed first
+		//Update buttons too
+
+		//Displays all available information about a profile
+		menu.transform.GetChild(0).GetComponent<Text>().text = helpers.concatenateData(_id, gameGraph, false, null);
+	}
+
+	/* Updates static components of the menu:
+	loads all profiles into the list located on the left of the screen
+	loads names into the dropdown menu */
+	internal void updateMenuStatic()
+	{
+		string data = "";
+		List<string> namesList = new List<string>();
+		for (int i = 0; i < gameGraph.getCount(); i++)
+		{
+			data += "---------------------------------------------\n" +
+			helpers.concatenateData(i, gameGraph, true, namesList) +
+			"---------------------------------------------\n";
+		}
+
+		//Loading all generated text into a visual text field
+		transform.GetChild(1).GetChild(1).GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = data;
+
+		//Loading the namesList into a dropdown used for verification
+		menu.transform.GetChild(2).GetComponent<Dropdown>().AddOptions(namesList);
+	}
+
+	/* Verifies adjacency of two nodes and their names. */
+	internal void verifyVertex(int vx0, int vx1, bool mode)
+	{
+
 	}
 }
