@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-internal class visualVertex : MonoBehaviour
+internal class VisualVertex : MonoBehaviour
 {
 	internal GameObject vertexPrefab;
 	internal GameObject driver;
@@ -21,7 +21,7 @@ internal class visualVertex : MonoBehaviour
 	levelIndex	-- id of the current element within its pyramid level
 	totalCount	-- total number of elements generated so far, passed by reference
 	size			-- maximum number of elements to generate
-	Technically recursive, although it calls this method attached to other GameObjects */
+	Technically recursive, although it calls this method attached to another GameObjects */
 	internal void buildVisualGraph(int _id, int level, int levelIndex, ref int totalCount, int size, Graph gameGraph)
 	{
 		GameObject newVertex;
@@ -41,25 +41,22 @@ internal class visualVertex : MonoBehaviour
 		{
 			newVertex = Instantiate(vertexPrefab, transform.position + new Vector3(5, 0, 0), transform.rotation);
 			newVertex.transform.SetParent(this.gameObject.transform.parent);
-			newVertex.GetComponent<visualVertex>().buildVisualGraph(totalCount, level, levelIndex + 1, ref totalCount, size, gameGraph);
+			newVertex.GetComponent<VisualVertex>().buildVisualGraph(totalCount, level, levelIndex + 1, ref totalCount, size, gameGraph);
 		}
 
 		if (levelIndex == 0 && totalCount < size) //Index 0 belongs to the first element in a level, we'll use it to "jump" to the next level and start generation again
 		{
 			newVertex = Instantiate(vertexPrefab, transform.position + new Vector3(-2.5f, 0, 5), transform.rotation);
 			newVertex.transform.SetParent(this.gameObject.transform.parent);
-			newVertex.GetComponent<visualVertex>().buildVisualGraph(totalCount, level + 1, 0, ref totalCount, size, gameGraph);
+			newVertex.GetComponent<VisualVertex>().buildVisualGraph(totalCount, level + 1, 0, ref totalCount, size, gameGraph);
 		}
 
 		/* Disables this GameObject unless it's the last element added to the graph. */
-		if (id != size - 1)
+		if (id < size - 2)
 			this.gameObject.SetActive(false);
 	}
 
-	/* Called when a collider of the object registers a mouse click */
-	void OnMouseDown()
-	{
-		driver.GetComponent<driver>().updateMenuActive(id);
-		driver.GetComponent<driver>().gameGraph.BFT(id, 1);
-	}
+	/* Called when a collider of the object registers a mouse click 
+	Clicks are processed by the driver. */
+	void OnMouseDown() => driver.GetComponent<Driver>().clickVertex(id);
 }

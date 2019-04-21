@@ -43,10 +43,7 @@ public class HashTable
 	}
 
 	/* Returns a hash of the passed key. */
-	internal int hashFunction(int _key)
-	{
-		return (_key % tableSize);
-	}
+	internal int hashFunction(int _key) => (_key % tableSize);
 
 
 	/* Checks whether the key is present in the hash table */

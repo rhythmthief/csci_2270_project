@@ -33,10 +33,7 @@ class LinkedList
 	private int length = 0;
 
 	/* Default constructor */
-	internal LinkedList()
-	{
-		head = null;
-	}
+	internal LinkedList() => head = null;
 
 	/* Checks whether the linked list is empty. */
 	internal bool isEmpty()
@@ -62,12 +59,10 @@ class LinkedList
 		head = newNode;
 	}
 
-	/* Deletes the entire linked list */
-	internal void deleteList()
-	{
-		/* Deallocation is unnecessary as .net garbage collector will spot unreferenced nodes and deallocate them for me. */
-		head = null; //All I really have to do is null the reference to the beginning of the linked list
-	}
+	/* Deletes the entire linked list. 
+	Deallocation is unnecessary as .net garbage collector will spot unreferenced nodes and deallocate them for me.
+	All I really have to do is null the reference to the beginning of the linked list. */
+	internal void deleteList() => head = null;
 
 	/* Returns the length of the linked list */
 	internal int listLength()

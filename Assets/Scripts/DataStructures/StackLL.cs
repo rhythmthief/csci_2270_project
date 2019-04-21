@@ -9,10 +9,7 @@ class StackNode
 	internal StackNode next = null;
 
 	/* Uses a parameterized constructor */
-	internal StackNode(string _key)
-	{
-		key = _key;
-	}
+	internal StackNode(string _key) => key = _key;
 }
 
 /* Stack implemented using a linked list */
@@ -21,10 +18,7 @@ class StackLL
 	private StackNode head;
 
 	/* Default constructor */
-	internal StackLL()
-	{
-		head = null;
-	}
+	internal StackLL() => head = null;
 
 	/* Pushes an element to the top of the stack */
 	internal void push(string key)

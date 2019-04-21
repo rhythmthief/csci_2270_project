@@ -1,7 +1,7 @@
 #Contains data necessary to build a graph.
 #Each node will contain a name, a country and three misc fields
 
-#Names the file: 36
+#Names the file: 37
 
 #names
 Musa Warren
@@ -33,6 +33,7 @@ Andrew Ryan
 Genichiro Ashina
 Gyoubu Oniwa
 JC Denton
+Max Payne
 Bobby Newmark
 Armitage Corto
 William Gibson

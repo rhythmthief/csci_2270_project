@@ -15,10 +15,18 @@ internal class Vertex
 	internal string country;
 	internal string[] misc; //Holds strings of miscellaneous information
 	internal bool[] fieldAccess = { false, false, false, false, false }; //Tracks whether a particular field from above can be accessed by the player
-	internal StackLL clueCache; //This stack stores all tips that can be accessible via this vertex
-	internal LinkedList clueShown; //A linked list which contains tips which have been popped from the clueCache stack
-	internal int edgeCount = 0;
+
+	internal StackLL clueCache; //This stack stores all clues that can be accessible via this vertex
+	internal bool cluesCached = false;
+	internal string clue; //Contains all popped clues
+
+
+	internal bool status = false; //Determines whether the vertex has been completely guessed in-game (name + all edges). True -- the vertex is complete
+	internal int edgeCount = 0;   //Total number of edges from this vertex
+	internal int edgesFoundCount = 0; //The number of edges found by the player
 	internal GameObject visual; //Visual representation of the vertex in-game
+
+	internal HashTable edgesFoundHT; //A Hash Table with the edges which the player has already discovered. Prevents repeated connections
 
 
 	/* Parameterized constructor for a vertex */
@@ -28,7 +36,8 @@ internal class Vertex
 		country = _country;
 		misc = _misc;
 		clueCache = new StackLL();
-		clueShown = new LinkedList();
+		edgesFoundHT = new HashTable(7);
+		clue = "Clues about acquaintances:\n";
 	}
 };
 
@@ -89,19 +98,20 @@ internal class Graph
 	{
 		bool adjacent = false;
 
-		if (matrix[vx0, vx1] == true) //I only need to check one side, since edges are undirected
-			adjacent = true;
+		if (vx0 > -1 && vx0 < size && vx1 > -1 && vx1 < size) //Making sure we're not out of bounds
+			if (matrix[vx0, vx1] == true) //I only need to check one side, since edges are undirected
+				adjacent = true;
 
 		return adjacent;
 	}
 
 	/* Returns a reference to the vertex under a given index */
-	internal Vertex getVertex(int _index)
+	internal Vertex getVertex(int _id)
 	{
 		Vertex vx = null;
-		if (_index < vertices.Count)
+		if (_id < vertices.Count)
 		{
-			vx = vertices[_index];
+			vx = vertices[_id];
 		}
 		else
 		{
@@ -113,21 +123,13 @@ internal class Graph
 	}
 
 	/* Returns the maximum size of the graph */
-	internal int getSize()
-	{
-		return size;
-	}
+	internal int getSize() => size;
 
 	/* Returns the current number of elements in the graph */
-	internal int getCount()
-	{
-		return vertices.Count;
-	}
+	internal int getCount() => vertices.Count;
 
-	internal int getVertexEdgeCount(int index)
-	{
-		return vertices[index].edgeCount;
-	}
+	/* Returns the number of edges the vertex shares with other vertices */
+	internal int getVertexEdgeCount(int index) => vertices[index].edgeCount;
 
 	/* Traverses to a certain depth from a given vertex and enables GameObjects. One of two overloads of BFT. */
 	internal void BFT(int _vx, int depth)
@@ -153,7 +155,6 @@ internal class Graph
 			}
 		}
 	}
-
 	#endregion
 
 
@@ -161,18 +162,32 @@ internal class Graph
 	/* GAME-SPECIFIC METHODS */
 	#region GAME
 
-	/* Assigns a visual component of the vertex.
-	Takes an index of a vertex and GameObject to assign. */
-	internal void setVisual(int _index, GameObject _visual)
+	/* Making sure the edge the player is attempting to draw hasn't already been discovered */
+	internal bool edgeUnique(int _id0, int _id1) => !(getVertex(_id0).edgesFoundHT.searchItem(_id1));
+
+	/* Sets the status of a vertex to true (complete) if requirements are met. 
+	Returns the current completion status */
+	internal bool setStatus(int _id)
 	{
-		vertices[_index].visual = _visual;
+		bool state = false;
+
+		if (getVertex(_id).edgeCount == getVertex(_id).edgesFoundCount)
+		{
+			vertices[_id].status = true;
+			state = true;
+		}
+
+		return state;
 	}
 
+	/* Assigns a visual component of the vertex.
+	Takes an index of a vertex and GameObject to assign. */
+	internal void setVisual(int _id, GameObject _visual) => vertices[_id].visual = _visual;
 
 	/* Makes data of a vertex accessible to the player.
 	Takes the index of a vertex and the index of a misc string.
 	Passing -1 as the latter makes all misc strings accessible. */
-	internal void openField(int _index, int _fieldIndex)
+	internal void openField(int _id, int _fieldIndex)
 	{
 		/* Fields:
 			0 -- name
@@ -181,56 +196,71 @@ internal class Graph
 
 		if (_fieldIndex != -1)
 		{
-			vertices[_index].fieldAccess[_fieldIndex] = true;
+			vertices[_id].fieldAccess[_fieldIndex] = true;
 		}
 		else
 		{
 			//Makes all data accessible
-			for (int i = 0; i < vertices[_index].fieldAccess.Length; i++)
+			for (int i = 0; i < vertices[_id].fieldAccess.Length; i++)
 			{
-				vertices[_index].fieldAccess[i] = true;
+				vertices[_id].fieldAccess[i] = true;
 			}
 		}
 	}
+
+	/* Checks whether a field is accessible through UI */
+	internal bool checkField(int _id, int field) => getVertex(_id).fieldAccess[field];
+
+	/* Increments the number of edges found in two vertices by 1, adds vertices to hash tables to be looked up later */
+	internal void setEdgesFound(int _id0, int _id1)
+	{
+		getVertex(_id0).edgesFoundCount++;
+		getVertex(_id1).edgesFoundCount++;
+
+		getVertex(_id0).edgesFoundHT.insertItem(_id1);
+		getVertex(_id1).edgesFoundHT.insertItem(_id0);
+	}
+
+	/* Returns the clue string of a vertex. */
+	internal string getClue(int _id) => getVertex(_id).clue;
 
 	/* Looks up data from adjacent nodes and returns it as a string.
 	Takes the index of a focused vertex and a boolean for execution mode.
 	Mode 0 -- pulls up the data one edge away
 	Mode 1 -- goes two edges away, used for the final stage of the game */
-	internal string getTip(int _index, bool mode)
+	internal void newClue(int _id, bool mode)
 	{
+		Vertex vx = getVertex(_id);
 		if (!mode) //Mode 0, used for the majority of the game
 		{
-			//I am caching all tips in a stack for ease of use. If this statement passes, it means that the cache hasn't been built yet.
-			if (vertices[_index].clueCache.isEmpty() && vertices[_index].clueShown.isEmpty())
+			//I am caching all clues in a stack for ease of use. If this statement passes, it means that the cache hasn't been built yet.
+			if (vx.clueCache.isEmpty() && !vx.cluesCached)
 			{
-				for (int i = 0; i < size; i++)
-				{
-					if (matrix[_index, i] == true)
-					{
-						//Pushes country first as it will be the last clue a user can receive about a node
-						vertices[_index].clueCache.push(vertices[i].country);
+				vx.cluesCached = true;
 
-						//And then pushes the misc data
+				for (int i = 0; i < size - 1; i++) //Going to size-1 because the last vertex operates by special rules and therefore its misc doesn't get collected
+				{
+					if (matrix[_id, i] == true)
+					{
+						//Cashes the misc data
 						for (int j = 0; j < 3; j++)
-							vertices[_index].clueCache.push(vertices[i].misc[j]);
+							vx.clueCache.push(vertices[i].misc[j]);
+
+						//Caches the country
+						vx.clueCache.push(vertices[i].country);
 					}
 
 				}
 			}
 
 			//Once the player requests a clue, it gets popped from a cache stack and added to a linked list, which is then displayed in-game
-			if (!vertices[_index].clueCache.isEmpty())
-			{
-				vertices[_index].clueShown.addNode(vertices[_index].clueCache.pop());
-			}
+			if (!vx.clueCache.isEmpty())
+				vx.clue += "\n" + vx.clueCache.pop();
 		}
 		else
 		{
 			//Mode 1, activated in the latter half of the game
 		}
-
-		return null;
 	}
 	#endregion
 
