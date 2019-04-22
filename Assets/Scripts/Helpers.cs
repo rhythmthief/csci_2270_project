@@ -166,7 +166,7 @@ internal class Helpers
 	internal Graph buildGraph(int _size)
 	{
 		Graph gameGraph = new Graph(_size);
-		StreamReader stream = new StreamReader("Assets/DataFiles/graphData.cyb"); //Initializes a stream and opens a predefined data file
+		StreamReader stream = new StreamReader(Application.dataPath + "/Resources/graphData.txt"); //Initializes a stream and opens a predefined data file
 
 		//I considered using a linked list to store names for generation, but ultimately decided ot use standard Lists instead because I intend to roll random indexes later, so lookup would've been inefficient compared to a List
 		List<string> names = new List<string>();

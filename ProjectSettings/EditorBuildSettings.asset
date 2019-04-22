@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/Cyberspace.unity
+    guid: 9a4863e37fac4a9b884ab8a7ceab8cbf
   m_configObjects: {}
