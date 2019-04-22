@@ -11,23 +11,23 @@ using UnityEngine;
 The reason I decided to use a class instead of a struct is that my compiler flags pointers as "unsafe" code and refuses to compile unless I explicitly allow it in the project settings, which in turn makes the built-in .net garbage collector useless as it would not be able to track and deallocate unused memory. So, I would've had to pass a struct by reference for some operations, which in essence is what happens by default when I use a class.*/
 internal class Vertex
 {
+	/* In-game data */
 	internal string name;
 	internal string country;
 	internal string[] misc; //Holds strings of miscellaneous information
 	internal bool[] fieldAccess = { false, false, false, false, false }; //Tracks whether a particular field from above can be accessed by the player
 
+	/* Clues are cached within the vertices */
 	internal StackLL clueCache; //This stack stores all clues that can be accessible via this vertex
-	internal bool cluesCached = false;
-	internal string clue; //Contains all popped clues
-
+	internal bool clueCacheComplete = false;
+	internal string clueString; //Contains all popped clues
 
 	internal bool status = false; //Determines whether the vertex has been completely guessed in-game (name + all edges). True -- the vertex is complete
-	internal int edgeCount = 0;   //Total number of edges from this vertex
+	internal int edgeCount = 0;   //Total number of edges this vertex has
 	internal int edgesFoundCount = 0; //The number of edges found by the player
-	internal GameObject visual; //Visual representation of the vertex in-game
+	internal HashTable edgesFoundHT; //A Hash Table with the edges which the player has already discovered. Prevents repeated connections.
 
-	internal HashTable edgesFoundHT; //A Hash Table with the edges which the player has already discovered. Prevents repeated connections
-
+	internal GameObject visual; //Visual in-game representation of the vertex
 
 	/* Parameterized constructor for a vertex */
 	internal Vertex(string _name, string _country, string[] _misc)
@@ -37,7 +37,7 @@ internal class Vertex
 		misc = _misc;
 		clueCache = new StackLL();
 		edgesFoundHT = new HashTable(7);
-		clue = "Clues about acquaintances:\n";
+		clueString = "Clues about acquaintances:";
 	}
 };
 
@@ -51,11 +51,11 @@ internal class Graph
 	/*
 		The adjacency matrix stores information about edges between vertices of the graph. I am using a multidimensional array [,] as opposed to a regular array-of-arrays [][] since I can get away without the extra functionality the latter method would otherwise provide.
 		
-		0	1	0	0	1	Where 0 -- no edge
-		1	0	1	1	1	and 1 -- there is an edge
+		0	1	1	1	0	Where 0 -- no edge
+		1	0	1	0	1	and 1 -- there is an edge
 		1	1	0	1	0
-		1	0	0	0	1
-		0	0	0	1	0
+		1	0	1	0	1
+		0	1	0	1	0
 	*/
 
 	/* Methods expected in a graph implementation */
@@ -86,8 +86,9 @@ internal class Graph
 	{
 		if (!findEdge(vx0, vx1)) //Making sure the elements aren't already connected
 		{
-			vertices[vx0].edgeCount++;
+			vertices[vx0].edgeCount++; //Increments edge counters within vertices
 			vertices[vx1].edgeCount++;
+
 			matrix[vx0, vx1] = true;
 			matrix[vx1, vx0] = true; //The matrix has to be symmetrical relative to the main diagonal, since my edges are undirected
 		}
@@ -110,16 +111,11 @@ internal class Graph
 	{
 		Vertex vx = null;
 		if (_id < vertices.Count)
-		{
 			vx = vertices[_id];
-		}
 		else
-		{
 			Debug.Log("Graph.getVertex(): index exceeds the number of vertices.");
-		}
 
 		return vx;
-
 	}
 
 	/* Returns the maximum size of the graph */
@@ -131,15 +127,15 @@ internal class Graph
 	/* Returns the number of edges the vertex shares with other vertices */
 	internal int getVertexEdgeCount(int index) => vertices[index].edgeCount;
 
-	/* Traverses to a certain depth from a given vertex and enables GameObjects. One of two overloads of BFT. */
+	/* Traverses to a certain depth from a given vertex and enables GameObjects. One of two overloads of BFT. The second overload is found in the debug section below. */
 	internal void BFT(int _vx, int depth)
 	{
 		Queue<int> vxQueue = new Queue<int>(); //I'll use a generic queue for BFT
 		int vx = _vx;
-		//BFT will start with index 0
 
 		vxQueue.Enqueue(vx);
 
+		//Traverses the edges and activates corresponding GameObjects for a visual component of an adjacent vertex
 		while (vxQueue.Count != 0 && depth != 0)
 		{
 			vx = vxQueue.Dequeue();
@@ -149,19 +145,16 @@ internal class Graph
 			{
 				if (matrix[vx, i] == true && vertices[i].visual.gameObject.activeSelf == false) //activeSelf returns true if the game object is active
 				{
-					vertices[i].visual.gameObject.SetActive(true);
-					vxQueue.Enqueue(i);
+					vertices[i].visual.gameObject.SetActive(true); //Activating the visuals
+					vxQueue.Enqueue(i); //Technically unnecessary, since with the current game logics I am not traversing deeper than 1 edge, but it might change in the future
 				}
 			}
 		}
 	}
 	#endregion
 
-
-
 	/* GAME-SPECIFIC METHODS */
 	#region GAME
-
 	/* Making sure the edge the player is attempting to draw hasn't already been discovered */
 	internal bool edgeUnique(int _id0, int _id1) => !(getVertex(_id0).edgesFoundHT.searchItem(_id1));
 
@@ -171,6 +164,7 @@ internal class Graph
 	{
 		bool state = false;
 
+		//The vertex is complete if the number of discovered edges matches the number recorded during generation
 		if (getVertex(_id).edgeCount == getVertex(_id).edgesFoundCount)
 		{
 			vertices[_id].status = true;
@@ -211,18 +205,27 @@ internal class Graph
 	/* Checks whether a field is accessible through UI */
 	internal bool checkField(int _id, int field) => getVertex(_id).fieldAccess[field];
 
-	/* Increments the number of edges found in two vertices by 1, adds vertices to hash tables to be looked up later */
+	/* Increments the number of edges found by 1 for both vertices, adds vertices to hash tables to be looked up later */
 	internal void setEdgesFound(int _id0, int _id1)
 	{
-		getVertex(_id0).edgesFoundCount++;
-		getVertex(_id1).edgesFoundCount++;
+		Vertex vx0 = getVertex(_id0);
+		Vertex vx1 = getVertex(_id1);
 
-		getVertex(_id0).edgesFoundHT.insertItem(_id1);
-		getVertex(_id1).edgesFoundHT.insertItem(_id0);
+		//Setting the cache flags to false so the player can generate a new one and avoid fetching data about a discovered vertex
+		vx0.clueCacheComplete = false;
+		vx1.clueCacheComplete = false;
+
+		//These counters are used to track completion of a vertex
+		vx0.edgesFoundCount++;
+		vx1.edgesFoundCount++;
+
+		//Inserts the discovered edge into a hash table of a vertex for fast look-up (so the player can't duplicate the same edge)
+		vx0.edgesFoundHT.insertItem(_id1);
+		vx1.edgesFoundHT.insertItem(_id0);
 	}
 
-	/* Returns the clue string of a vertex. */
-	internal string getClue(int _id) => getVertex(_id).clue;
+	/* Returns the string with clues for a vertex. */
+	internal string getClue(int _id) => getVertex(_id).clueString;
 
 	/* Looks up data from adjacent nodes and returns it as a string.
 	Takes the index of a focused vertex and a boolean for execution mode.
@@ -231,16 +234,20 @@ internal class Graph
 	internal void newClue(int _id, bool mode)
 	{
 		Vertex vx = getVertex(_id);
+
 		if (!mode) //Mode 0, used for the majority of the game
 		{
 			//I am caching all clues in a stack for ease of use. If this statement passes, it means that the cache hasn't been built yet.
-			if (vx.clueCache.isEmpty() && !vx.cluesCached)
+			if (!vx.clueCacheComplete)
 			{
-				vx.cluesCached = true;
+				vx.clueCache.deleteStack(); //Clears out the old cache
+				vx.clueString += "\n"; //Inserting a line break into the clueString string to separate old from new clues
+
+				vx.clueCacheComplete = true;
 
 				for (int i = 0; i < size - 1; i++) //Going to size-1 because the last vertex operates by special rules and therefore its misc doesn't get collected
 				{
-					if (matrix[_id, i] == true)
+					if (matrix[_id, i] == true && edgeUnique(_id, i)) //Makes sure the edge hasn't already been discovered, and if so, skips the clueString generation for the checked vertex
 					{
 						//Cashes the misc data
 						for (int j = 0; j < 3; j++)
@@ -253,19 +260,19 @@ internal class Graph
 				}
 			}
 
-			//Once the player requests a clue, it gets popped from a cache stack and added to a linked list, which is then displayed in-game
+			//Once the player requests a clueString, it gets popped from a cache stack and added to a linked list, which is then displayed in-game
 			if (!vx.clueCache.isEmpty())
-				vx.clue += "\n" + vx.clueCache.pop();
+				vx.clueString += "\n" + vx.clueCache.pop();
 		}
 		else
 		{
-			//Mode 1, activated in the latter half of the game
+			//Mode 1 has been deprecated due to time constaints, but it might be back in the future
 		}
 	}
 	#endregion
 
-	#region DEBUGGING
 	/* DEBUG METHODS */
+	#region DEBUGGING
 
 	/* Prints out all node data and edges as a console entry. */
 	internal void printVertices()
@@ -328,10 +335,10 @@ internal class Graph
 		vxQueue.Enqueue(vx);
 		visited[0] = true;
 
+		//Standard BFT
 		while (vxQueue.Count != 0)
 		{
 			vx = vxQueue.Dequeue();
-
 			for (int i = 0; i < size; i++)
 			{
 				if (matrix[vx, i] == true && visited[i] == false)

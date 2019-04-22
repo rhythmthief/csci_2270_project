@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
 internal class HTNode
 {
 	internal int key;
@@ -15,12 +14,13 @@ internal class HTNode
 	}
 };
 
+/* A basic hash table implementation */
 public class HashTable
 {
 	private int tableSize;
 	private HTNode[] table;
 
-	/* Parameterized constructor */
+	/* Parameterized constructor, takes the number of buckets to produce */
 	internal HashTable(int _size)
 	{
 		tableSize = _size;
@@ -32,6 +32,7 @@ public class HashTable
 		}
 	}
 
+	/* Inserts an item into the hash table */
 	internal void insertItem(int _key)
 	{
 		if (!searchItem(_key)) //Won't accept duplicates
@@ -45,7 +46,6 @@ public class HashTable
 	/* Returns a hash of the passed key. */
 	internal int hashFunction(int _key) => (_key % tableSize);
 
-
 	/* Checks whether the key is present in the hash table */
 	internal bool searchItem(int _key)
 	{
@@ -53,6 +53,7 @@ public class HashTable
 		int index = hashFunction(_key);
 		HTNode walker = table[index]; //Getting a pointer to the first element of a bucket under a given index
 
+		//Traversing and looking for the right key
 		while (walker != null)
 		{
 			if (walker.key == _key)

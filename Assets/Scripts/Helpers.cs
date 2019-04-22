@@ -50,7 +50,7 @@ internal class Helpers
 			/* Rolling misc */
 			while (miscCount != 3)
 			{
-				while (usedMisc.searchItem(miscIndex)) //Same as usedNames above
+				while (usedMisc.searchItem(miscIndex)) //Same as usedNames above, shouldn't affect performance
 					miscIndex = Random.Range(0, misc.Count);
 
 				usedMisc.insertItem(miscIndex);
@@ -64,7 +64,7 @@ internal class Helpers
 		else
 		{
 			//The last element is the starting vertex of the player
-			gameGraph.addVertex("[YOU]", "[CLASSIFIED]", new string[] { "[UNKNOWN]", "[UNKNOWN]", "[UNKNOWN]" });
+			gameGraph.addVertex("[YOU]", "[CLASSIFIED]", new string[] { "[CLASSIFIED]", "[CLASSIFIED]", "[CLASSIFIED]" });
 		}
 
 		//Some fields have to be accessible to the player through UI
@@ -104,7 +104,6 @@ internal class Helpers
 		/*	I am building a connected graph, so I need make sure that all elements can be reached from the starting point.
 			In order to guarantee connectivity, I am going to have indices of all currently connected nodes to a hash table, and ensure that a vertex I am currently rolling is connected to at least one of them. */
 
-
 		if (index != gameGraph.getSize() - 1) //Generating an edge for every element other than the last one
 		{
 			/* Creates a new hash table if this is the first call */
@@ -132,12 +131,12 @@ internal class Helpers
 			{
 				if (i != index) //Vertices are not allowed to be connected to themselves
 				{
-					roll = Random.Range(i / 2, gameGraph.getSize()-1); //Higher chance to connect to nodes of a greater index
+					roll = Random.Range(i / 2, gameGraph.getSize() - 1); //Higher chance to connect to nodes of a greater index
 
-					if (roll == i)
+					if (roll == i) //If I rolled the current index, I'm connecting
 					{
 						gameGraph.insertEdge(index, i); //If the edge is already present, insertEdge won't add it again. This roll is still valid though
-						connected.insertItem(i); //The newly connected element is now connected to the rest of the graph
+						connected.insertItem(i); //The newly connected element is now connected to the rest of the graph, so I save it in the hash table
 					}
 
 					//A limit on the maximum number of edges a node can accumulate through these rolls
@@ -161,9 +160,7 @@ internal class Helpers
 		}
 	}
 
-
-	/* 	Can be accessed from outside of this class
-		Reads graph data from a file, distributes it among vertices, randomly connects the vertices. 
+	/* 	Reads graph data from a file, distributes it among vertices, randomly connects the vertices. 
 		Takes the size of a graph to generate. Returns a populated Graph object.
 		Additionally, takes a string from the driver and saves rolled names into it. */
 	internal Graph buildGraph(int _size)
@@ -171,7 +168,7 @@ internal class Helpers
 		Graph gameGraph = new Graph(_size);
 		StreamReader stream = new StreamReader("Assets/DataFiles/graphData.cyb"); //Initializes a stream and opens a predefined data file
 
-		//I considered using a linked list to store names for generation, but ultimately decided ot use standardLists instead because I intend to roll random indexes later, so lookup would've been inefficient compared to a list
+		//I considered using a linked list to store names for generation, but ultimately decided ot use standard Lists instead because I intend to roll random indexes later, so lookup would've been inefficient compared to a List
 		List<string> names = new List<string>();
 		List<string> countries = new List<string>();
 		List<string> misc = new List<string>();
@@ -203,7 +200,7 @@ internal class Helpers
 			generateEdge(gameGraph, null, 0); //Rolling edges for the graph, recursive
 
 			/* As a final step, I am going to verify that the newly generated graph is connected. There's logics in generateEdge() method to ensure that the graph does turn out to be connected, but it never hurts to make sure. If the graph is somehow not connected (which should never be the case), I am going to recursively run this function again.
-			Note: running again WOULD technically do unnecessary work to read the file again, but since the graph is guaranteed to be connected unless some unforeseen logical error I didn't account for takes place, it is highly unlikely that the recursive call will ever take place. Still, the functionality for the graph to game to heal itself is there! */
+			Note: running again WOULD technically do unnecessary work to read the file again, but since the graph is guaranteed to be connected unless some unforeseen logical error I didn't account for takes place, it is highly unlikely that the recursive call will ever take place. Still, the functionality for the game graph to heal itself is there! */
 			if (gameGraph.graphConnected())
 			{
 				Debug.Log("The Graph is connected. Generation successful.");
@@ -219,15 +216,14 @@ internal class Helpers
 	}
 
 	/* Returns a string will all available data about a vertex. Switches between two modes:
-	False -- generates a profile view for the menu on the right side of the screen with [UNKNOWN] elements
+	False -- generates a profile view for the active vertex menu with [UNKNOWN] elements
 	True -- generates complete profiles, but without the available clues. Shown on the left.
-	 The second mode (true) also fills up a namesList passed by reference*/
+	The second mode (true) also fills up a namesList passed by reference*/
 	internal string concatenateData(Vertex vx, bool mode, List<string> namesList)
 	{
 		string data = "";
 
 		//It's rather tedious to check every field and concatenate, but it's a tradeoff for better code readability in the rest of the project
-
 		/* Completion status displayed on the right */
 		if (mode == false)
 		{

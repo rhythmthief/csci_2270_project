@@ -10,6 +10,12 @@ class StackNode
 
 	/* Uses a parameterized constructor */
 	internal StackNode(string _key) => key = _key;
+
+	/* For debugging only. Prints a message proving that memory has been deallocated by .net garbage collector */
+	// ~StackNode()
+	// {
+	// 	Debug.Log("Deleting " + key);
+	// }
 }
 
 /* Stack implemented using a linked list */
@@ -19,6 +25,11 @@ class StackLL
 
 	/* Default constructor */
 	internal StackLL() => head = null;
+
+	/* Deletes the entire stack. 
+		Deallocation is unnecessary as .net garbage collector will spot unreferenced nodes and deallocate them for me.
+		All I really have to do is null the reference to the beginning of the linked list. */
+	internal void deleteStack() => head = null;
 
 	/* Pushes an element to the top of the stack */
 	internal void push(string key)
