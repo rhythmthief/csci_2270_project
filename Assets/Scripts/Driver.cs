@@ -180,9 +180,9 @@ public class Driver : MonoBehaviour
 		for (int i = 0; i < gameGraph.getCount(); i++)
 		{
 			vx = gameGraph.getVertex(i);
-			data += "---------------------------------\n" +
+			data += "-------------------------------\n" +
 			helpers.concatenateData(vx, true, namesList) +
-			"---------------------------------\n\n";
+			"-------------------------------\n\n";
 		}
 
 		//Loading all generated text into a visual text field on the left
