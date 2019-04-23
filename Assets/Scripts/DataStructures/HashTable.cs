@@ -15,7 +15,7 @@ internal class HTNode
 };
 
 /* A basic hash table implementation */
-public class HashTable
+internal class HashTable
 {
 	private int tableSize;
 	private HTNode[] table;

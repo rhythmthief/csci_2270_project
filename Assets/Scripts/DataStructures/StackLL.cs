@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /* Basic node of a linked list */
-class StackNode
+internal class StackNode
 {
 	internal string key;
 	internal StackNode next = null;
@@ -19,7 +19,7 @@ class StackNode
 }
 
 /* Stack implemented using a linked list */
-class StackLL
+internal class StackLL
 {
 	private StackNode head;
 

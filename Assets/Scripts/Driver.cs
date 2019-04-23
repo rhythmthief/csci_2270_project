@@ -39,7 +39,7 @@ using UnityEngine.SceneManagement;
 
 public class Driver : MonoBehaviour
 {
-	/* Data file */
+	/* Data files */
 	public TextAsset dataFile; //Assigned through the Editor inspector window
 
 	/* Graph */
@@ -50,6 +50,8 @@ public class Driver : MonoBehaviour
 	internal Helpers helpers = new Helpers(); //I am calling the helper functions I need through this instance, seeing how I can't inherit from both MonoBehavior and Helpers
 
 	/* Scoring */
+	internal BST scores; //Stores the scores of all players who've completed the game through either ending condition
+	internal float sessionScore = 0;
 	internal int cluesUsed = 0;
 	internal int verticesComplete = 0; //Counter for the total number of vertices fully guessed by the player
 
@@ -60,7 +62,6 @@ public class Driver : MonoBehaviour
 	internal bool verifying = false; //Determines whether the UI is in verification mode
 
 	/* Visuals */
-	internal Text timerDisplay;
 	internal GameObject marker0; //Used as a visual indicator for a selected node
 	internal GameObject marker1; //Used as a visual indicator for a selected node
 	internal GameObject particlePrefab; //Used to spawn particle systems
@@ -77,13 +78,18 @@ public class Driver : MonoBehaviour
 							   8 -- timer
 							   9 -- restart
 							   10 -- quit
+							   
 							   11 -- tutorial button
 							   12 -- tutorial text box
 							   13 -- message text box
+
+							   14 -- scores text box
+							   15 -- scores submit button
+							   16 -- scores input field
 						    */
 
 	/* The code below is executed before the first frame is rendered by the Unity engine */
-	void Start()
+	void Awake()
 	{
 		Application.targetFrameRate = 60; //Sets the target framerate for this application
 
@@ -96,17 +102,19 @@ public class Driver : MonoBehaviour
 		/* This call goes to the pre-exiting GameObject with an attached visualVertex script and builds up the graph from there. */
 		transform.GetChild(0).GetChild(0).gameObject.GetComponent<VisualVertex>().buildVisualGraph(0, 0, 0, ref temp, gameGraph.getSize(), gameGraph);
 
+		/* Scoring */
+		scores = new BST();
+		helpers.readScore(scores);
+
 		/* Visuals */
 		particlePrefab = transform.GetChild(2).gameObject; //Located a particle GameObject to make copies of
 		marker0 = transform.GetChild(3).gameObject; //Visual markers displayed to the player
 		marker1 = transform.GetChild(4).gameObject;
-		menu = new GameObject[14];
+		menu = new GameObject[17];
 		timer = 300f; //Default time
 
-		for (int i = 0; i < 14; i++) //Sets references to in-game menu elements (GameObjects)
+		for (int i = 0; i < 17; i++) //Sets references to in-game menu elements (GameObjects)
 			menu[i] = transform.GetChild(1).GetChild(i).gameObject;
-
-		timerDisplay = menu[8].transform.GetChild(0).GetComponent<Text>(); //A text box which will be used as a timer
 
 		edgeCheck = new int[2] { size - 1, -1 }; //Setting default values for the game start
 
@@ -123,7 +131,6 @@ public class Driver : MonoBehaviour
 	internal void gameOver(bool mode)
 	{
 		string message;
-		float score = 0;
 
 		if (mode)
 			message = "You won! Final score:\n";
@@ -131,12 +138,16 @@ public class Driver : MonoBehaviour
 			message = "You lost. Final score:\n";
 
 		message += "Time left: + " + Mathf.Floor(timer) + " x 5\n"
-				+ "Vertices matched: + " + verticesComplete + " x 15\n"
+				+ "Vertices matched: + " + verticesComplete + " x 30\n"
 				+ "Clues used: - " + cluesUsed + " x 10\n";
 
-		score = Mathf.Floor(timer) * 5 + verticesComplete * 15 - cluesUsed * 10;
-		message += "Total: " + score;
-		displayMessage(message, 120f);
+		sessionScore = Mathf.Floor(timer) * 5 + verticesComplete * 30 - cluesUsed * 10;
+		message += "Total: " + sessionScore;
+		displayMessage(message, 180f);
+
+		menu[14].SetActive(true); //Enabling the leaderboards
+		menu[14].transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = "High Scores:\n" + scores.getScore(false); //Populates the leaderboards
+		menuUpdateButtons(2, false); //Switches the UI buttons into the endgame mode
 	}
 
 	/* Displays a message for the player on-screen */
@@ -196,33 +207,51 @@ public class Driver : MonoBehaviour
 	}
 
 	/* Flips the UI button states. Takes a new state and execution mode.
-	_mode == true -- default mode.
-	_mode == false -- the function was called by clickVertex and we only need to update one button. */
-	internal void menuUpdateButtons(bool _mode, bool _state)
+	_mode == 0 -- the function was called by clickVertex and we only need to update one button.
+	_mode == 1 -- default mode. 
+	_mode == 2 -- endgame mode, all buttons are disabled, scoring is shown instead */
+	internal void menuUpdateButtons(int _mode, bool _state)
 	{
-		if (_mode)
+		switch (_mode)
 		{
-			//True -- verification state, false -- default state
+			case 0:
+				{
+					//Called by a selected vertex, toggling clue button
+					if (gameGraph.checkField(edgeCheck[0], 0)) //Makes sure the vertex has been guessed before displaying the Clue button
+						menu[3].SetActive(true);
+					else
+						menu[3].SetActive(false);
+					break;
+				}
 
-			//Making sure that the name hasn't been guessed before activating a dropdown menu
-			if (_state == true && !gameGraph.checkField(edgeCheck[0], 0))
-				menu[1].SetActive(true);
-			else
-				menu[1].SetActive(false);
+			case 1:
+				{
+					//Making sure that the name hasn't been guessed before activating a dropdown menu
+					if (_state == true && !gameGraph.checkField(edgeCheck[0], 0))
+						menu[1].SetActive(true);
+					else
+						menu[1].SetActive(false);
 
-			//Setting appropriate buttons (see reference before Start())
-			menu[2].SetActive(!_state);
-			menu[3].SetActive(!_state);
-			for (int i = 4; i < 6; i++)
-				menu[i].SetActive(_state);
-		}
-		else
-		{
-			//Called by a selected vertex, toggling clue button
-			if (gameGraph.checkField(edgeCheck[0], 0)) //Makes sure the vertex has been guessed before displaying the Clue button
-				menu[3].SetActive(true);
-			else
-				menu[3].SetActive(false);
+					//Setting appropriate buttons (see reference before Start())
+					menu[2].SetActive(!_state);
+					menu[3].SetActive(!_state);
+					for (int i = 4; i < 6; i++)
+						menu[i].SetActive(_state);
+					break;
+				}
+
+			case 2:
+				{
+					for (int i = 1; i < 6; i++)
+						menu[i].SetActive(false); //Disables all in-game buttons
+
+					menu[15].SetActive(true); //Submit button
+					menu[16].SetActive(true); //Input field
+
+					break;
+				}
+			default:
+				break;
 		}
 	}
 
@@ -258,6 +287,22 @@ public class Driver : MonoBehaviour
 	}
 
 	#region CLICK PROCESSING
+
+	/* Records the player's score in the leaderboard and saves it locally */
+	public void clickScoreSubmit()
+	{
+		//Makes sure the input field is not empty
+		if (menu[16].transform.GetChild(2).GetComponent<Text>().text != "")
+		{
+			//Inserts the player's record into the corresponding BST
+			scores.insert(sessionScore, menu[16].transform.GetChild(2).GetComponent<Text>().text);
+
+			//Populates the scoring board with updated scores
+			menu[14].transform.GetChild(0).GetChild(0).GetChild(0).GetComponent<Text>().text = "High Scores:\n" + scores.getScore(false);
+			helpers.writeScore(scores); //Writing the scores to a file
+		}
+	}
+
 	/* Reloads the scene to restart the entire game. */
 	public void clickRestart() => SceneManager.LoadScene("Cyberspace");
 
@@ -272,7 +317,7 @@ public class Driver : MonoBehaviour
 	{
 		//Changes the button layout and enters verification mode
 		verifying = true;
-		menuUpdateButtons(true, true);
+		menuUpdateButtons(1, true);
 	}
 
 	/* Processes clue button clicks. */
@@ -353,6 +398,10 @@ public class Driver : MonoBehaviour
 				timer -= 10;
 			}
 		}
+		else
+		{
+			displayMessage("Edge already exists", 3f);
+		}
 	}
 
 	/* Processes cancel button clicks */
@@ -360,7 +409,7 @@ public class Driver : MonoBehaviour
 	{
 		//Changes the button layout and exits verification mode
 		verifying = false;
-		menuUpdateButtons(true, false);
+		menuUpdateButtons(1, false);
 
 		//Disables the second marker since we are no longer verifying a vertex
 		marker1.SetActive(false);
@@ -392,7 +441,7 @@ public class Driver : MonoBehaviour
 
 			//Updates the active menu component if we're currently not verifying any vertices
 			menuUpdateActive(_id);
-			menuUpdateButtons(false, false); //Switches the Clue button on and off based on whether the name of this vertex has been guessed
+			menuUpdateButtons(0, false); //Switches the Clue button on and off based on whether the name of this vertex has been guessed
 		}
 	}
 	#endregion
@@ -407,19 +456,21 @@ public class Driver : MonoBehaviour
 			float seconds = Mathf.Floor(timer % 60); //Mathf.Floor() appears to be the "official" way of getting integer-like values from floating points within Unity
 
 			/* Putting together a string */
-			timerDisplay.text = Mathf.Floor(timer / 60) + ":";
+
+
+			menu[8].transform.GetChild(0).GetComponent<Text>().text = Mathf.Floor(timer / 60) + ":";
 
 			if (seconds < 10)
 			{
-				timerDisplay.text += "0";
+				menu[8].transform.GetChild(0).GetComponent<Text>().text += "0";
 			}
 
-			timerDisplay.text += Mathf.Floor(timer % 60); //Assigning the new time string
+			menu[8].transform.GetChild(0).GetComponent<Text>().text += Mathf.Floor(timer % 60); //Assigning the new time string
 
 			//Game over condition
 			if (timer < 0)
 			{
-				timerDisplay.text = "00:00"; //One last update so that the clock doesn't display an invalid value
+				menu[8].transform.GetChild(0).GetComponent<Text>().text = "00:00"; //One last update so that the clock doesn't display an invalid value
 				timer = 0;
 				gameFinished = true;
 				gameOver(false); //Notifying the game that it's over

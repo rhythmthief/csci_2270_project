@@ -260,4 +260,38 @@ internal class Helpers
 
 		return data;
 	}
+
+	/* Reads the game score from a file. The file is predetermined. */
+	internal void readScore(BST bst)
+	{
+		if (File.Exists(Application.dataPath + "/Records.txt")) //Making sure the file exists before we attempt to read it
+		{
+			StreamReader reader = new StreamReader(Application.dataPath + "/Records.txt"); //Opens a specific file in a stream reader
+			string line;
+			string[] split;
+
+			while ((line = reader.ReadLine()) != null) //the reader will return null on reaching the last line
+			{
+				split = line.Split(',');
+				line = "";
+
+				for (int i = 1; i < split.Length; i++)
+					line += split[i]; //Just a precaution in case the player enters a name with commas and it gets saved. Once read, the name will have been changed as follows: "test,name" -> "testname"
+
+				bst.insert(int.Parse(split[0]), line);
+			}
+
+			reader.Close(); //Closing the stream
+		}
+	}
+
+	/* Writes the game score to a file. The file is predetermined. */
+	internal void writeScore(BST bst)
+	{
+		StreamWriter writer = new StreamWriter(Application.dataPath + "/Records.txt", false); //Opens a new stream and overwrites the existing file
+
+		Debug.Log(bst.getScore(true));
+		writer.Write(bst.getScore(true)); //Writes the scores to a file
+		writer.Close(); //Closing the stream
+	}
 }
