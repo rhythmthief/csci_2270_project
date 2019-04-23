@@ -11,15 +11,15 @@ using System.IO; //Contains the StreamReader class
 
 internal class Helpers
 {
-	/* A helper function which reads a section of a stream into a List until encountering a given stopword. Takes a StreamReader object and a List of strings to insert elements into. */
-	void readSection(StreamReader stream, List<string> list)
+	/* A helper function which reads a section of a stream into a List until encountering a given stopword. Takes a list of strings to insert a new element into, a string array with parsed lines from a file, and the index of the current line */
+	void readSection(List<string> list, ref string[] readLines, ref int i)
 	{
-		string line = stream.ReadLine();
+		i++;
 
-		if (line != "#stop")
+		if (readLines[i] != "#stop")
 		{
-			list.Add(line);
-			readSection(stream, list); //Recursive call
+			list.Add(readLines[i]);
+			readSection(list, ref readLines, ref i); //Recursive call
 		}
 	}
 
@@ -161,38 +161,38 @@ internal class Helpers
 	}
 
 	/* 	Reads graph data from a file, distributes it among vertices, randomly connects the vertices. 
-		Takes the size of a graph to generate. Returns a populated Graph object.
-		Additionally, takes a string from the driver and saves rolled names into it. */
-	internal Graph buildGraph(int _size)
+		Takes the size of a graph to generate and a TextAsset file to read. Returns a populated Graph object. */
+	internal Graph buildGraph(int _size, TextAsset dataFile)
 	{
 		Graph gameGraph = new Graph(_size);
-		StreamReader stream = new StreamReader(Application.dataPath + "/Resources/graphData.txt"); //Initializes a stream and opens a predefined data file
+		string[] readLines = dataFile.text.Split('\n');
 
 		//I considered using a linked list to store names for generation, but ultimately decided ot use standard Lists instead because I intend to roll random indexes later, so lookup would've been inefficient compared to a List
 		List<string> names = new List<string>();
 		List<string> countries = new List<string>();
 		List<string> misc = new List<string>();
-		string line;
 
 		if (_size > 1) //Makes sure there's at least 2 elements to insert
 		{
-			/* I will be storing contents of my file in lists for later manipulation */
-			while ((line = stream.ReadLine()) != null) //StreamReader returns a null once it reaches the end of an input
 			{
-				switch (line)
+				/* I will be storing contents of my file in lists for later manipulation */
+				for (int i = 0; i < readLines.Length; i++)
 				{
-					/* Looks for starting points of sections in the data file. */
-					case "#names":
-						readSection(stream, names);
-						break;
+					switch (readLines[i])
+					{
+						/* Looks for starting points of sections in the data file. */
+						case "#names":
+							readSection(names, ref readLines, ref i);
+							break;
 
-					case "#countries":
-						readSection(stream, countries);
-						break;
+						case "#countries":
+							readSection(countries, ref readLines, ref i);
+							break;
 
-					case "#misc":
-						readSection(stream, misc);
-						break;
+						case "#misc":
+							readSection(misc, ref readLines, ref i);
+							break;
+					}
 				}
 			}
 
@@ -208,7 +208,7 @@ internal class Helpers
 			else
 			{
 				Debug.Log("The generated graph is disconnected. Running a recursive call...");
-				return buildGraph(_size);
+				return buildGraph(_size, dataFile);
 			}
 		}
 

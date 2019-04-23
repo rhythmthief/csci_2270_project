@@ -39,6 +39,9 @@ using UnityEngine.SceneManagement;
 
 public class Driver : MonoBehaviour
 {
+	/* Data file */
+	public TextAsset dataFile; //Assigned through the Editor inspector window
+
 	/* Graph */
 	internal int size;
 	internal Graph gameGraph;
@@ -86,7 +89,7 @@ public class Driver : MonoBehaviour
 
 		/* Graph generation */
 		size = 10; //Size of the graph to generate. Has to be at least 2
-		gameGraph = helpers.buildGraph(size); //Generates a graph
+		gameGraph = helpers.buildGraph(size, dataFile); //Generates a graph
 		int temp = 0; //Used as a counter for building a visual graph below
 		gameGraph.printVertices(); //Quick debug function, prints all generated vertices in the engine log
 
@@ -300,7 +303,6 @@ public class Driver : MonoBehaviour
 					//At this point the player has successfully guessed the vertex name and one of its edges
 
 					gameGraph.openField(edgeCheck[0], -1); //Opening all data of the vertex
-					menuUpdateActive(edgeCheck[0]); //Updating the active vertex info to reflect the changes
 					gameGraph.BFT(edgeCheck[0], 1); //We'll traverse the graph from the verified vertex up to one edge away and activate inactive vertices
 					clickCancel(); //I'll just call this function to reset the UI
 
@@ -318,6 +320,8 @@ public class Driver : MonoBehaviour
 						else
 							vx[i].visual.GetComponent<VisualVertex>().setColor(1);
 					}
+
+					menuUpdateActive(edgeCheck[0]); //Updating the active vertex info to reflect the changes
 
 					//Sets the name for the visual representation of the guessed vertex
 					vx[0].visual.transform.GetChild(0).GetChild(1).GetComponent<Text>().text = vx[0].name;
@@ -338,14 +342,14 @@ public class Driver : MonoBehaviour
 					else
 					{
 						//Notifying the player about successful connection
-						displayMessage("Success: " + vx[0].name + " <--> " + vx[1].name, 3f);
+						displayMessage("Success: " + vx[0].name + " <--> " + vx[1].name + " (+20 seconds)", 3f);
 					}
 				}
 			}
 			else
 			{
 				//Error message displayed to the player in case the guess is wrong.
-				displayMessage("Wrong, -10 seconds", 3f);
+				displayMessage("Wrong (-10 seconds)", 3f);
 				timer -= 10;
 			}
 		}
