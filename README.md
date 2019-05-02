@@ -6,6 +6,7 @@ Section 303 (Thursdays at 9:30AM)
 
 Runs on Unity engine.  
 The goal of the game is to reconstruct a pre-generated graph through progressive traversal of vertices.  
+
 Gameplay loop:  
 
 0) The player starts with a named vertex.
@@ -19,7 +20,7 @@ Used Data Structures:
 Graph — the underlying data structure of this project.  
 HashTable — heavily used during graph generation in Helpers.  
 StackLL — A stack implemented using a linked list, exists in every graph vertex.  
-BST — used for the scoring.  
+BST — used for scoring.  
 
 
 ![picture](https://raw.githubusercontent.com/rhythmthief/csci_2270_project/master/screenshot.png "In-game view.")
