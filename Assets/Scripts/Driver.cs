@@ -14,19 +14,18 @@ using UnityEngine.SceneManagement;
 		The player starts with a single revealed node and sees one random piece of information for every connected node as well as for their own immediate connections, but the exact relationship to the original node is not specified. The goal is to match all names with their respective nodes. Nodes are verified as name + at least 1 connection. The player works against a clock, verification and clues cost time. The goal is to reveal the entire graph.
 
 	Gameplay loop:
-		0) The player starts with one revealed profile
-		1) The player inspects a revealed profile and its surroundings, requests information from the revealed profile
-		2) The player examines all clues and compares them against a list of profiles available in a section on-screen
-		3) The player matches a node with a name based on provided clues and connects it
-		4) The player verifies their guess
-		5) Go to step (1) unless the entire graph has been uncovered
-
-
+		0) The player starts with a named vertex.
+		1) They inspect the named vertex and its surroundings, request clues about vertices its adjacent to.
+		2) The player examines all clues and compares them against a list of vertices available in a section on-screen.
+		3) They match an unnamed vertex with a name based on provided clues and connect to the original named vertex.
+		4) The player verifies their guess, the previously unnamed profile is named and displays an edge if the guess was right.
+		5) Go to step (0) unless the entire graph has been reconstructed.
 
 	Used Data Structures:
 		Graph -- the underlying data structure of this project
 		HashTable -- heavily used during graph generation in Helpers
-		StackLL -- A stack implemented using a linked list
+		StackLL -- A stack implemented using a linked list, exists in every graph vertex
+		BST -- used for the scoring
 
 	Implemented, but deprecated:
 		LinkedList -- I fully implemented a linked list, but dropped its use in favor of a better-optimized approach without the use of a data structure
