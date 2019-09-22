@@ -1,7 +1,5 @@
 # csci_2270_project
 
-Dennis Windham  
-
 Runs on Unity Engine.  
 This game was inspired by detective/mystery board games. The goal of the game is to reconstruct a pre-generated graph through use of clues and deduction.
 
