@@ -5,16 +5,16 @@ Student ID: 109304752
 Section 303 (Thursdays at 9:30AM)  
 
 Runs on Unity engine.  
-The goal of the game is to reconstruct a pre-generated graph through progressive traversal of vertices.  
+This game was inspired by detective/mystery board games. The goal of the game is to reconstruct a pre-generated graph through use of clues and deduction.
 
 Gameplay loop:  
 
-0) The player starts with a named vertex.
-1) They inspect the named vertex and its surroundings, request clues about vertices its adjacent to.
-2) The player examines all clues and compares them against a list of vertices available in a section on-screen.
-3) They match an unnamed vertex with a name based on provided clues and connect to the original named vertex.
-4) The player verifies their guess, the previously unnamed profile is named and displays an edge if the guess was right.
-5) Go to step (0) unless the entire graph has been reconstructed.
+1) The player starts with a named vertex.
+2) The named vertex and surrounding unnamed vertices are inspected by the player, who then uses the named vertex from (1) to request clues about unnamed vertices it's adjacent to.
+3) The player examines all clues from (2) and compares them against a list of vertices available in an on-screen window.
+4) One of the vertices from the list is discovered to match clues from (2) and available data of an unnamed vertex, the player attempts to ascertain the unnamed vertex's identity by giving it a name from the list and connecting it to the named vertex from (1).
+5) The player verifies their guess, the hitherto unnamed profile is named and displays an edge if the guess was right.
+6) Go to step (0) unless the entire graph has been reconstructed, in which case the player wins the game.
 
 Used Data Structures:  
 Graph — the underlying data structure of this project.  
