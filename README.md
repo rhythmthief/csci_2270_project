@@ -1,7 +1,7 @@
 # csci_2270_project
 
 Runs on Unity Engine.  
-This game was inspired by detective/mystery board games. The goal of the game is to reconstruct a pre-generated graph through use of clues and deduction.
+This game was inspired by detective/mystery board games and developed as a final project for the CSCI 2270 (Data Structures) course I took in Spring 2019. The goal of the game is to reconstruct a pre-generated graph through use of clues and deduction.
 
 Gameplay loop:  
 
